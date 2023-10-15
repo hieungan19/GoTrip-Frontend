@@ -5,16 +5,11 @@ import { Route, Routes } from 'react-router-dom';
 import SignupPage from './pages/auth/SignupPage';
 import CustomAppBar from './components/appbar/CustomAppBar';
 import Footer from './components/footer/Footer';
-
+import PlacePage from './pages/place/PlacePage';
 function App() {
   return (
     <div className='App'>
-      <CustomAppBar />
-      <Routes>
-        <Route path='/login' element={<LoginPage />} />
-        <Route path='/signup' element={<SignupPage />} />
-      </Routes>
-      <Footer />
+      <PlacePage />
     </div>
   );
 }
