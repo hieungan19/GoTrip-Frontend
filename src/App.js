@@ -6,10 +6,11 @@ import SignupPage from './pages/auth/SignupPage';
 import CustomAppBar from './components/appbar/CustomAppBar';
 import Footer from './components/footer/Footer';
 import PlacePage from './pages/place/PlacePage';
+import FollowerDialog from './components/profileHeader/TestFollowerList';
 function App() {
   return (
     <div className='App'>
-      <PlacePage />
+      <FollowerDialog />
     </div>
   );
 }
