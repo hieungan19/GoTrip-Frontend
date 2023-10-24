@@ -39,39 +39,7 @@ const FollowerDialog = () => {
   return (
     <div>
       <Button onClick={handleClickOpen}>{followers.length} followers</Button>
-      <Dialog onClose={handleClose} open={open} PaperProps={{ sx: { borderRadius: '20px', boxSizing: 'border-box',overflowX: "hidden" } }}>
-        <DialogTitle sx={{ textAlign: "center", backgroundColor: "rgba(168, 228, 169, 0.1)"}}>
-          Followers
-          <IconButton
-            edge="end"
-            color="inherit"
-            onClick={handleClose}
-            sx={{ position: "absolute", right: "8px", top: "8px"}}
-          >
-            <CloseIcon />
-          </IconButton>
-        </DialogTitle>
-        <DialogContent
-          sx={{
-            width: "350px",
-            height: "650px",
-            padding: 0,
-            margin: 0,
-            backgroundColor: "rgba(168, 228, 169, 0.1)",
-            overflowY: "auto",
-            maxHeight: "100%",
-            "&::-webkit-scrollbar": {
-              width: "10px",
-            },
-            "&::-webkit-scrollbar-thumb": {
-              background: "#588E76",
-              borderRadius: "6px",
-            },
-          }}
-        >
-          <FollowerList followers={followers} />
-        </DialogContent>
-      </Dialog>
+      <FollowerList followers={followers} open={open} handleClose={handleClose} />
     </div>
   );
 };
