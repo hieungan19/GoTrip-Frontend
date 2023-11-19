@@ -1,18 +1,25 @@
-import React, { useState } from 'react';
 import {
-  Container,
-  Typography,
-  TextField,
-  Button,
-  Paper,
-  Grid,
   Box,
+  Button,
+  CircularProgress,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Grid,
+  Paper,
+  TextField,
+  Typography,
 } from '@mui/material';
-import { Link } from 'react-router-dom';
-import { Colors } from '../../../styles/theme';
-import { linkStyle } from '../../../styles/text';
 import axios from 'axios';
+import { useState } from 'react';
 import { toast } from 'react-toastify';
+import { Colors } from '../../../styles/theme';
+import { Link, useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { SET_ACTIVE_USER } from '../../../redux/slice/authSlice';
 
 function LoginForm() {
   const BASE_URL = process.env.REACT_APP_API_URL;
@@ -22,7 +29,40 @@ function LoginForm() {
     password: '',
   });
 
+  const [confirmationCode, setConfirmationCode] = useState('');
+
   const [isLoading, setIsLoading] = useState(false);
+  const [dialogForgotPasswordOpen, setDialogForgotPasswordOpen] =
+    useState(false);
+
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const handleVerifyCode = async () => {
+    try {
+      const data = new FormData();
+
+      data.append('email', formData.email);
+      data.append('token', confirmationCode);
+
+      const response = await axios.post(`${BASE_URL}/authen/verify/pin`, data);
+      const r = response.data;
+      if (r.message === 'success') {
+        dispatch(
+          SET_ACTIVE_USER({
+            email: formData.email,
+          })
+        );
+      }
+      navigate('/change-password');
+    } catch (err) {
+      toast.error('Wrong code.');
+    }
+  };
+
+  const closeDialog = () => {
+    setDialogForgotPasswordOpen(false);
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -37,21 +77,51 @@ function LoginForm() {
     setIsLoading(true);
 
     try {
-      const response = await axios.post(`${BASE_URL}/authenticate/login`, {
-        email: formData.email,
-        password: formData.password,
-      });
+      const data = new FormData();
+      data.append('email', formData.email); // Thay email bằng giá trị từ state hoặc form input
+      data.append('password', formData.password); // Thay password bằng giá trị từ state hoặc form input
+      const response = await axios.post(`${BASE_URL}/authen/login`, data);
 
-      console.log('Login successful!', response.data);
+      const userInfo = response.data.data.user;
+      const token = response.data.data.token;
+
+      dispatch(
+        SET_ACTIVE_USER({
+          email: userInfo.email,
+          name: userInfo.name,
+          isLoggedIn: true,
+          token: token,
+          id: userInfo.id,
+        })
+      );
+
+      toast.success('Login successfully!');
+      navigate('/home');
       setIsLoading(false);
     } catch (error) {
-      // Handle login failure (e.g., show error message)
-      console.error('Login failed:', error);
       setIsLoading(false);
+      console.log(error);
       toast.error(error.message);
     }
   };
 
+  const handleSendVerifyCode = async () => {
+    try {
+      const data = new FormData();
+      data.append('email', formData.email);
+      console.log(data);
+      const response = await axios.post(
+        `${BASE_URL}/authen/forgot-password`,
+        data
+      );
+      if (response.data.success === true) {
+        toast.success('Send code successfully!');
+        setDialogForgotPasswordOpen(true);
+      }
+    } catch (err) {
+      toast.error('Send code failed.');
+    }
+  };
   return (
     <Container maxWidth='xs'>
       <Paper
@@ -69,60 +139,115 @@ function LoginForm() {
           fontWeight={700}
           gutterBottom
         >
-          Login
+          {'Login'}
         </Typography>
-        <form onSubmit={loginUser} style={{ width: '100%' }}>
-          <TextField
-            variant='outlined'
-            margin='normal'
-            required
-            fullWidth
-            id='email'
-            label='Email Address'
-            name='email'
-            autoComplete='email'
-            autoFocus
-            value={formData.email}
-            onChange={handleChange}
-          />
-          <TextField
-            variant='outlined'
-            margin='normal'
-            required
-            fullWidth
-            name='password'
-            label='Password'
-            type='password'
-            id='password'
-            autoComplete='current-password'
-            value={formData.password}
-            onChange={handleChange}
-          />
+        <form style={{ width: '100%' }}>
+          @csrf
+          <>
+            <TextField
+              variant='outlined'
+              margin='normal'
+              required
+              fullWidth
+              id='email'
+              label='Email Address'
+              name='email'
+              autoComplete='email'
+              autoFocus
+              value={formData.email}
+              onChange={handleChange}
+            />
+            <TextField
+              variant='outlined'
+              margin='normal'
+              required
+              fullWidth
+              name='password'
+              label='Password'
+              type='password'
+              id='password'
+              autoComplete='current-password'
+              value={formData.password}
+              onChange={handleChange}
+            />
+          </>
           <Button
             type='submit'
             fullWidth
             variant='contained'
             color='primary'
             sx={{ mt: 1 }}
+            onClick={loginUser}
           >
-            Sign In
+            {isLoading ? <CircularProgress /> : 'Log In'}
+          </Button>
+          <Button
+            onClick={handleSendVerifyCode}
+            fullWidth
+            variant='text'
+            color='primary'
+            sx={{
+              mt: 1,
+              textTransform: 'none', // Tắt chữ in hoa
+              fontSize: '0.85rem', // Điều chỉnh kích thước chữ
+              textDecoration: 'underline', // Gạch chân
+              '&:hover': {
+                backgroundColor: 'transparent', // Loại bỏ màu nền khi hover
+              },
+            }}
+          >
+            Forgot Password?
           </Button>
           <Box mt={1} />
           <Grid container justifyContent='center'>
             <Grid item>
-              <Typography // Replace with your sign-up route
-                variant='body2'
-              >
-                Dont have an account?
-                <Link style={linkStyle} to={'/signup'}>
-                  {' '}
-                  Log In
-                </Link>
+              <Typography variant='body2'>
+                <>
+                  {"Don't have an account?"}
+                  <Link to={'/signup'}> Sign Up</Link>
+                </>
               </Typography>
             </Grid>
           </Grid>
         </form>
       </Paper>
+      <Dialog
+        open={dialogForgotPasswordOpen}
+        onClose={closeDialog}
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Box sx={{ width: { xs: '300px', md: '400px' } }}>
+          <DialogTitle>Password Reset Email Sent</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              An email with a verification code was just sent to{' '}
+              {formData.email}
+            </DialogContentText>
+          </DialogContent>
+          <DialogContent>
+            <TextField
+              label='Confirmation Code'
+              fullWidth
+              variant='outlined'
+              mb={2}
+              value={confirmationCode}
+              onChange={(e) => setConfirmationCode(e.target.value)}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleVerifyCode} variant='contained'>
+              NEXT
+            </Button>
+            <Button onClick={closeDialog} variant='contained' color='secondary'>
+              CANCEL
+            </Button>
+          </DialogActions>
+        </Box>
+      </Dialog>
     </Container>
   );
 }

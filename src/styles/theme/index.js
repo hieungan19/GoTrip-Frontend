@@ -2,7 +2,7 @@ import { createTheme } from '@mui/material/styles';
 import { lighten } from 'polished';
 export const Colors = {
   primary: '#588E76',
-  secondary: '#d1adcc',
+  secondary: '#FFA54F',
   success: '#4CAF50',
   info: '#00a2ff',
   danger: '#FF5722',
@@ -25,6 +25,9 @@ export const Colors = {
   ///////////////
   white: '#fff',
   black: '#000',
+
+  //More
+  love: '#ff3040',
 };
 
 const theme = createTheme({
@@ -48,7 +51,6 @@ const theme = createTheme({
         paper: {
           background: Colors.primary,
           color: Colors.secondary,
-          borderRadius: '0px 100px 0px 0px',
         },
       },
     },

@@ -3,9 +3,9 @@ import { createSlice } from '@reduxjs/toolkit';
 const initialState = {
   isLoggedIn: false,
   email: null,
-  useName: null,
-  fullName: null,
-  userID: null,
+  id: null,
+  name: null,
+  token: null,
 };
 
 const authSlice = createSlice({
@@ -14,19 +14,19 @@ const authSlice = createSlice({
   reducers: {
     SET_ACTIVE_USER: (state, action) => {
       // console.log(action.payload);
-      const { email, userName, userID, fullName } = action.payload;
+      const { email, id, name, token } = action.payload;
       state.isLoggedIn = true;
       state.email = email;
-      state.userName = userName;
-      state.userID = userID;
-      state.fullName = fullName;
+      state.id = id;
+      state.name = name;
+      state.token = token;
     },
     REMOVE_ACTIVE_USER(state, action) {
       state.isLoggedIn = false;
       state.email = null;
-      state.userName = null;
-      state.userID = null;
-      state.fullName = null;
+      state.id = null;
+      state.name = null;
+      state.token = null;
     },
   },
 });
@@ -35,7 +35,7 @@ export const { SET_ACTIVE_USER, REMOVE_ACTIVE_USER } = authSlice.actions;
 
 export const selectIsLoggedIn = (state) => state.auth.isLoggedIn;
 export const selectEmail = (state) => state.auth.email;
-export const selectUserName = (state) => state.auth.userName;
-export const selectUserID = (state) => state.auth.userID;
-export const selectFullName = (state) => state.auth.fullName;
+export const selectUserId = (state) => state.auth.id;
+export const selectUserName = (state) => state.auth.name;
+export const selectToken = (state) => state.auth.token;
 export default authSlice.reducer;

@@ -10,7 +10,6 @@ import {
 import React, { useState } from 'react';
 import { Colors } from '../../../styles/theme';
 import { Link, useNavigate } from 'react-router-dom';
-import { linkStyle } from '../../../styles/text';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
@@ -18,13 +17,12 @@ const UserSignUpForm = () => {
   const BASE_URL = process.env.REACT_APP_API_URL;
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    fullName: '',
-    username: '',
+    name: '',
     email: '',
     password: '',
     confirmPassword: '',
   });
-
+  const [passwordsMatchError, setPasswordsMatchError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e) => {
@@ -35,25 +33,33 @@ const UserSignUpForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     // Perform form validation here
+    // Check if passwords match
     if (formData.password !== formData.confirmPassword) {
-      alert('Passwords do not match');
+      setPasswordsMatchError(true);
       return;
     }
+    // Reset the error state
+    setPasswordsMatchError(false);
+    // Implement logic to change the password
     setIsLoading(true);
     try {
-      const response = await axios.post(`${BASE_URL}/authenticate/register`, {
-        ...formData,
-      });
-      console.log('Sign up successful!', response.data);
+      const data = new FormData();
+      data.append('name', formData.name);
+      data.append('email', formData.email);
+      data.append('password', formData.password);
+      data.append('password_confirmation', formData.confirmPassword);
+
+      const response = await axios.post(`${BASE_URL}/authen/register`, data);
+      toast.success('Register sucessfully!Please login.');
       setIsLoading(false);
-      navigate('/login');
+      setTimeout(() => {
+        navigate('/login');
+      }, 2000);
     } catch (error) {
       console.error('Sign up failed:', error);
       setIsLoading(false);
       toast.error(error.message);
     }
-
-    // Handle form submission here, e.g., send data to the server
   };
 
   return (
@@ -81,19 +87,12 @@ const UserSignUpForm = () => {
             <TextField
               fullWidth
               label='Full Name'
-              name='fullName'
-              value={formData.fullName}
+              name='name'
+              value={formData.name}
               onChange={handleChange}
               margin='normal'
             />
-            <TextField
-              fullWidth
-              label='Username'
-              name='username'
-              value={formData.username}
-              onChange={handleChange}
-              margin='normal'
-            />
+
             <TextField
               fullWidth
               label='Email'
@@ -123,6 +122,8 @@ const UserSignUpForm = () => {
               value={formData.confirmPassword}
               onChange={handleChange}
               margin='normal'
+              error={passwordsMatchError}
+              helperText={passwordsMatchError ? 'Passwords do not match' : ''}
             />
             <Button
               type='submit'
@@ -141,10 +142,7 @@ const UserSignUpForm = () => {
                   variant='body2'
                 >
                   Already have an account?
-                  <Link style={linkStyle} to={'/login'}>
-                    {' '}
-                    Login
-                  </Link>
+                  <Link to={'/login'}> Login</Link>
                 </Typography>
               </Grid>
             </Grid>

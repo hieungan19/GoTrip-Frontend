@@ -7,11 +7,15 @@ const SignupPage = () => {
   return (
     <Box sx={{ flexGrow: 1 }}>
       <Grid container spacing={2} alignItems='center'>
-        <Grid item xs={6}>
+        <Grid item xs={12} md={6}>
           <SignUpForm />
         </Grid>
-        <Grid item xs={6}>
-          <img src={signupImg} alt='car' style={{ height: '90vh' }} />
+        <Grid item md={6} sx={{ display: { xs: 'none', md: 'block' } }}>
+          <img
+            src={signupImg}
+            alt='Signup Img'
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          />
         </Grid>
       </Grid>
     </Box>
