@@ -4,16 +4,35 @@ import {
   Avatar,
   Box,
   Button,
+  CircularProgress,
   IconButton,
   Modal,
   TextField,
   Typography,
 } from '@mui/material';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { storage } from '../../firebase/firebaseConfig';
+import { v4 as uuidv4 } from 'uuid';
+import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
+import { useSelector } from 'react-redux';
+import { selectToken } from '../../redux/slice/authSlice';
+import axios from 'axios';
+import { toast } from 'react-toastify';
 
-const CreatePostModal = ({ open = true, onClose }) => {
+const CreatePostModal = ({ open, onClose, postDataToUpdate = null }) => {
   const [postDetail, setPostDetail] = useState('');
   const [selectedImages, setSelectedImages] = useState([]);
+  const [isLoading, setLoading] = useState(false);
+  //api
+  const token = useSelector(selectToken);
+  const API_URL = process.env.REACT_APP_API_URL;
+
+  useEffect(() => {
+    if (postDataToUpdate) {
+      setPostDetail(postDataToUpdate.content || ''); // Set content for updating
+      setSelectedImages(postDataToUpdate.images || []);
+    }
+  }, [postDataToUpdate]);
 
   const handleImageInputChange = (event) => {
     const files = event.target.files;
@@ -28,11 +47,83 @@ const CreatePostModal = ({ open = true, onClose }) => {
     });
   };
 
-  const handleCreatePost = () => {
-    console.log('User Name:', 'John Doe');
-    console.log('Post Detail:', postDetail);
-    console.log('Selected Images:', selectedImages);
-    onClose();
+  const handleUploadImages = async () => {
+    try {
+      const imageUrls = await Promise.all(
+        selectedImages.map(async (image) => {
+          const imageRef = ref(storage, `images/${uuidv4()}`);
+          const uploadTask = uploadBytesResumable(imageRef, image);
+
+          return new Promise((resolve, reject) => {
+            uploadTask.on(
+              'state_changed',
+              (snapshot) => {
+                const percent = Math.round(
+                  (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+                );
+              },
+              (err) => {
+                console.log(err);
+                reject(err);
+              },
+              () => {
+                // download url
+                getDownloadURL(uploadTask.snapshot.ref)
+                  .then((url) => {
+                    console.log(url);
+                    resolve(url);
+                  })
+                  .catch((error) => {
+                    console.log(error);
+                    reject(error);
+                  });
+              }
+            );
+          });
+        })
+      );
+
+      return imageUrls;
+    } catch (error) {
+      console.error('Error uploading images:', error.message);
+    }
+  };
+
+  const handleCreateOrUpdatePost = async () => {
+    setLoading(true);
+    try {
+      const images = await handleUploadImages();
+
+      const postData = {
+        content: postDetail,
+        images: images,
+      };
+
+      if (postDataToUpdate) {
+        // If updating, send a PUT request
+        await axios.put(`${API_URL}/posts/${postDataToUpdate.id}`, postData, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        // Handle the response as needed
+        console.log('Bài viết cập nhật thành công');
+      } else {
+        // If creating, send a POST request
+        const response = await axios.post(`${API_URL}/posts`, postData, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        toast.success('Post created sucessfully.');
+        console.log('Bài viết tạo thành công:', response.data);
+      }
+    } catch (error) {
+      toast.error('Failed to create post. ');
+      console.error('Lỗi khi tạo/cập nhật bài viết:', error.message);
+    }
+    setLoading(false);
+    onClose(); // Close the modal after creating/updating
   };
 
   return (
@@ -80,11 +171,9 @@ const CreatePostModal = ({ open = true, onClose }) => {
           mb={1}
           sx={{ border: 'none' }}
           InputProps={{
-            // <== adjusted this
-            disableUnderline: true, // <== added this
+            disableUnderline: true,
           }}
         />
-
         <Box mt={2} display='flex' flexDirection='row' flexWrap={'wrap'}>
           {Array.isArray(selectedImages) &&
             selectedImages.map((image, index) => (
@@ -143,14 +232,18 @@ const CreatePostModal = ({ open = true, onClose }) => {
           alignItems='flex-end'
           mt={2} // Push the button to the bottom
         >
-          <Button
-            variant='contained'
-            color='primary'
-            onClick={handleCreatePost}
-            mt={2}
-          >
-            Create Post
-          </Button>
+          {isLoading ? (
+            <CircularProgress />
+          ) : (
+            <Button
+              variant='contained'
+              color='primary'
+              onClick={handleCreateOrUpdatePost}
+              mt={2}
+            >
+              {postDataToUpdate !== null ? 'Update Post' : 'Create Post'}
+            </Button>
+          )}
         </Box>
       </Box>
     </Modal>

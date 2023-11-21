@@ -5,7 +5,7 @@ const initialState = {
   email: null,
   id: null,
   name: null,
-  token: null,
+  token: '28|tm6y2PtIjvICsMytTjuZ13LFKMU6mSjt0FOoua2p',
 };
 
 const authSlice = createSlice({

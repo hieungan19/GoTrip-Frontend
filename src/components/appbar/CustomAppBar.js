@@ -12,9 +12,7 @@ import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import avatar from '../../assets/logo/logo.svg';
 import SideBar from '../sidebar/SideBar';
-import { useSelector } from 'react-redux';
-import { selectEmail } from '../../redux/slice/authSlice';
-import { Colors } from '../../styles/theme';
+import SearchAppBarIcon from './SearchAppBarIcon';
 
 const CustomAppBar = (props) => {
   const navigate = useNavigate();
@@ -51,27 +49,41 @@ const CustomAppBar = (props) => {
           >
             GOTRIP
           </Typography>
-          <Button
-            color='inherit'
+          <Box
+            component='nav'
             sx={{
-              mr: 1,
-              border:
-                location.pathname === '/login' ? '1px solid white' : 'none',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
             }}
-            onClick={() => navigate('login')}
           >
-            Login
-          </Button>
-          <Button
-            variant='contained'
-            sx={{
-              border:
-                location.pathname === '/signup' ? '2px solid white' : 'none',
-            }}
-            onClick={() => navigate('signup')}
-          >
-            Sign up
-          </Button>
+            <SearchAppBarIcon />
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Button
+                color='inherit'
+                sx={{
+                  mr: 1,
+                  border:
+                    location.pathname === '/login' ? '1px solid white' : 'none',
+                }}
+                onClick={() => navigate('login')}
+              >
+                Login
+              </Button>
+              <Button
+                variant='contained'
+                sx={{
+                  border:
+                    location.pathname === '/signup'
+                      ? '2px solid white'
+                      : 'none',
+                }}
+                onClick={() => navigate('signup')}
+              >
+                Sign up
+              </Button>
+            </Box>
+          </Box>{' '}
         </Toolbar>
       </AppBar>
       <Toolbar />

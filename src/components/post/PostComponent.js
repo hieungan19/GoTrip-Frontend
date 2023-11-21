@@ -11,6 +11,8 @@ import {
   CardHeader,
   CardMedia,
   IconButton,
+  Menu,
+  MenuItem,
   TextField,
   Typography,
 } from '@mui/material';
@@ -21,6 +23,14 @@ import 'slick-carousel/slick/slick-theme.css';
 import 'slick-carousel/slick/slick.css';
 import { Colors } from '../../styles/theme';
 import CommentList from './CommentList';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import DeletePostDialog from './DeletePostDialog';
+import axios from 'axios';
+import { toast } from 'react-toastify';
+import CreatePostModal from './CreatePostModal';
+import { format } from 'date-fns';
+import { useSelector } from 'react-redux';
+import { selectToken, selectUserId } from '../../redux/slice/authSlice';
 
 const images = [
   'https://th.bing.com/th/id/R.1abee17234dca9feaf9d0064bf491f6e?rik=Gs1TTKs9hDMyHg&pid=ImgRaw&r=0',
@@ -29,11 +39,66 @@ const images = [
   // Add more image URLs as needed
 ];
 
-const PostComponent = () => {
+const PostComponent = ({ post }) => {
+  const API_URL = process.env.REACT_APP_API_URL;
+  const formattedDate = format(new Date(post.created_at), 'dd/MM/yyyy HH:mm');
+  const token = useSelector(selectToken);
+
   const [showFullContent, setShowFullContent] = useState(false);
-  const [showReadMore, setShowReadMore] = useState(true);
+  const [showReadMore, setShowReadMore] = useState(
+    post.content?.length > 50 ? true : false
+  );
   const [comment, setComment] = useState('');
   const [like, setLike] = useState(true); // Added state for likes
+  const [anchorEl, setAnchorEl] = useState(null); // State for Menu
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [openEditDialog, setOpenEditDialog] = useState(false);
+
+  // post - user
+  const userId = useSelector(selectUserId);
+
+  const handleDeleteConfirm = async () => {
+    try {
+      const response = await axios.delete(`${API_URL}/posts/${post.id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      toast.success('Delete successfully.');
+    } catch (error) {
+      toast.error(error.message);
+    }
+    setOpenDeleteDialog(false);
+  };
+
+  const handleDeleteCancel = () => {
+    setOpenDeleteDialog(false);
+  };
+  //menu
+  const handleMenuClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleEditClick = () => {
+    // Implement logic for editing the post
+    setOpenEditDialog(true);
+    handleMenuClose();
+  };
+
+  const handleCloseEdit = () => {
+    setOpenDeleteDialog(false);
+  };
+
+  const handleDeleteClick = () => {
+    // Implement logic for deleting the post
+    console.log('Delete Post clicked!');
+    setOpenDeleteDialog(true);
+    handleMenuClose();
+  };
 
   const content =
     'Your long content goes here... Your long content goes here... Your long content goes here...';
@@ -69,53 +134,67 @@ const PostComponent = () => {
         display: 'flex',
         px: 1,
         flexDirection: 'column',
+        mt: 4,
         width: { lg: '600px', md: '500px', xs: '400px' },
       }}
       elevation={3}
     >
       <CardHeader
         sx={{ textAlign: 'left', px: 0 }}
-        avatar={<Avatar src='/path/to/avatar.jpg' />}
-        title='Username'
-        subheader='Posted 2 hours ago'
+        avatar={<Avatar src={post.author.avatar_url} />}
+        title={post.author.name}
+        subheader={formattedDate}
+        action={
+          post.author_id != userId ? (
+            <IconButton onClick={handleMenuClick}>
+              <MoreVertIcon />
+            </IconButton>
+          ) : null
+        }
       />
       <CardContent sx={{ px: 0 }}>
-        <Typography variant='body2' color='textSecondary' textAlign={'left'}>
-          {showFullContent
-            ? content
-            : `${content.slice(0, 50)}${showReadMore ? '...' : ''}`}
-          {showReadMore && !showFullContent && (
-            <Button
-              onClick={handleReadMoreClick}
-              sx={{ textTransform: 'capitalize' }}
-            >
-              ... Read More
-            </Button>
-          )}
-          {!showReadMore && (
-            <Button
-              onClick={handleReadMoreClick}
-              sx={{ textTransform: 'capitalize' }}
-            >
-              Read Less
-            </Button>
+        <Typography variant='body2' textAlign={'left'}>
+          {post && post.content && (
+            <>
+              {showFullContent
+                ? post.content
+                : `${post.content.slice(0, 50)}${showReadMore ? '...' : ''}`}
+              {showReadMore && !showFullContent && (
+                <Button
+                  onClick={handleReadMoreClick}
+                  sx={{ textTransform: 'capitalize' }}
+                >
+                  ... Read More
+                </Button>
+              )}
+              {!showReadMore && post.content?.length > 50 && (
+                <Button
+                  onClick={handleReadMoreClick}
+                  sx={{ textTransform: 'capitalize' }}
+                >
+                  Read Less
+                </Button>
+              )}
+            </>
           )}
         </Typography>
       </CardContent>
+      {Array.isArray(post.images) && (
+        <Slider {...settings}>
+          {post.images.map((item, index) => (
+            <Box key={item.id}>
+              <CardMedia
+                component='img'
+                alt={`Post Image ${index + 1}`}
+                height={{ lg: '600px', md: '500px', xs: '400px' }}
+                image={item.image_url}
+                sx={{ objectFit: 'cover', px: 0.2 }}
+              />
+            </Box>
+          ))}
+        </Slider>
+      )}
 
-      <Slider {...settings}>
-        {images.map((imageUrl, index) => (
-          <Box key={index} sx={{}}>
-            <CardMedia
-              component='img'
-              alt={`Post Image ${index + 1}`}
-              height={{ lg: '600px', md: '500px', xs: '400px' }}
-              image={imageUrl}
-              sx={{ objectFit: 'cover', px: 0.2 }}
-            />
-          </Box>
-        ))}
-      </Slider>
       <CardActions sx={{ px: 0 }} disableSpacing>
         <IconButton sx={{ pl: 0 }} aria-label='like' onClick={handleLikeClick}>
           <FavoriteIcon sx={{ color: like ? Colors.love : null }} />
@@ -132,7 +211,7 @@ const PostComponent = () => {
         fontWeight={700}
         sx={{ alignSelf: 'flex-start', mb: 1 }}
       >
-        0 likes
+        {post.like_count}
       </Typography>
       <Box>
         <CommentList />
@@ -162,6 +241,25 @@ const PostComponent = () => {
           }}
         />
       </Box>
+      <Menu
+        id='post-menu'
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleMenuClose}
+      >
+        <MenuItem onClick={handleEditClick}>Edit Post</MenuItem>
+        <MenuItem onClick={handleDeleteClick}>Delete Post</MenuItem>
+      </Menu>
+      <DeletePostDialog
+        openDeleteDialog={openDeleteDialog}
+        handleDeleteCancel={handleDeleteCancel}
+        handleDeleteConfirm={handleDeleteConfirm}
+      />
+      {/* <CreatePostModal
+        open={openEditDialog}
+        onClose={handleCloseEdit}
+        postDataToUpdate={post}
+      /> */}
     </Card>
   );
 };

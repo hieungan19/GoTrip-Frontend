@@ -5,7 +5,14 @@ import SuggestFollow from './component/SuggestFollow';
 
 const HomePage = () => {
   return (
-    <Box sx={{ pl: { xs: 0, sm: '200px' } }}>
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: { sm: 'center', lg: 'flex-start' },
+        pl: { xs: 0, sm: '200px' },
+      }}
+    >
       <PostList />
       <SuggestFollow />
     </Box>

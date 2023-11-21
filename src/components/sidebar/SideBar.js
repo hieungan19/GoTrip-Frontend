@@ -2,6 +2,7 @@ import {
   Avatar,
   Box,
   Container,
+  Divider,
   Drawer,
   List,
   ListItem,
@@ -9,20 +10,38 @@ import {
   ListItemText,
   Toolbar,
   Typography,
+  ListItemIcon,
 } from '@mui/material';
+import HomeIcon from '@mui/icons-material/Home';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import ChatIcon from '@mui/icons-material/Chat';
+import LogoutIcon from '@mui/icons-material/Logout';
 import React, { useState } from 'react';
 import { Colors } from '../../styles/theme';
-const drawerWidth = 200;
+import { useNavigate } from 'react-router-dom';
+
+const drawerWidth = 220;
+const icons = [
+  { icon: <HomeIcon />, label: 'HOME', key: 'home' },
+  { icon: <NotificationsIcon />, label: 'NOTIFICATION', key: 'notification' },
+  { icon: <ChatIcon />, label: 'CHAT', key: 'chat' },
+  { icon: <LogoutIcon />, label: 'LOGOUT', key: 'logout' },
+];
 
 const SideBar = ({ open, onClose }) => {
+  const navigate = useNavigate();
+
   const container =
     window !== undefined ? () => window().document.body : undefined;
   const [activeIndex, setActiveIndex] = useState(0);
 
   const handleListItemClick = (index) => {
+    const url = icons[index].label.toLowerCase();
+    navigate(`${url}`);
+    if (url === 'logout') navigate('/login');
     setActiveIndex(index);
-    onClose();
   };
+
   return (
     <Box sx={{ flexGrow: 1 }}>
       <Drawer
@@ -47,8 +66,8 @@ const SideBar = ({ open, onClose }) => {
         variant='permanent'
         anchor='left'
       >
-        <Toolbar></Toolbar>
-        <Container sx={{ py: 4 }}>
+        <Toolbar />
+        <Container sx={{ py: 4 }} onClick={() => navigate('/profile')}>
           <Avatar sx={{ mx: 'auto', p: 0, alignSelf: 'center' }} />
           <Typography
             sx={{
@@ -61,10 +80,11 @@ const SideBar = ({ open, onClose }) => {
             User name
           </Typography>
         </Container>
+        <Divider sx={{ width: '100%', borderWidth: '2px' }} />
         <List sx={{ py: 0 }}>
-          {['HOME', 'NOTIFICATION', 'CHAT', 'LOGOUT'].map((text, index) => (
+          {icons.map(({ icon, label, key }, index) => (
             <ListItem
-              key={index}
+              key={key} // Add the key prop here
               disablePadding
               sx={{
                 display: 'flex',
@@ -81,8 +101,15 @@ const SideBar = ({ open, onClose }) => {
                 onClick={() => handleListItemClick(index)}
                 sx={{ width: drawerWidth }}
               >
+                <ListItemIcon
+                  sx={{
+                    color: index === activeIndex ? Colors.white : Colors.black,
+                  }}
+                >
+                  {icon}
+                </ListItemIcon>
                 <ListItemText
-                  primary={text}
+                  primary={label}
                   sx={{
                     color: index === activeIndex ? Colors.white : Colors.black,
                     fontWeight: 'bold',

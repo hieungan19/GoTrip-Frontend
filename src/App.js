@@ -16,6 +16,7 @@ import ChatBox from './pages/chat/components/ChatBox';
 import ChatPage from './pages/chat/ChatPage';
 import HomePage from './pages/home/HomePage';
 import PostComponent from './components/post/PostComponent';
+import NotificationPage from './pages/notification/NotificationPage';
 
 function App() {
   return (
@@ -36,6 +37,8 @@ function App() {
           <Route path='/profile' element={<ProfilePage />} />
           <Route path='/profile/edit' element={<EditProfilePage />}></Route>
           <Route path='/home' element={<HomePage />} />
+          <Route path='/chat' element={<ChatPage />} />
+          <Route path='/notification' element={<NotificationPage />} />
         </Routes>
       </Container>
       <Footer />
