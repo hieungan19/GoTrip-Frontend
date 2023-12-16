@@ -26,7 +26,7 @@ const CreatePostModal = ({ open, onClose, postDataToUpdate = null }) => {
 
   const [isLoading, setLoading] = useState(false);
   //api
-  const token = useSelector(selectToken);
+  const token = localStorage.getItem('token');
   const API_URL = process.env.REACT_APP_API_URL;
 
   useEffect(() => {

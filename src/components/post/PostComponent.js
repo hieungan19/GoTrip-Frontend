@@ -43,7 +43,6 @@ const PostComponent = ({ post }) => {
   const avatar_url = useSelector(selectUserAvatar);
   const API_URL = process.env.REACT_APP_API_URL;
   const formattedDate = format(new Date(post.created_at), 'dd/MM/yyyy HH:mm');
-  const token = useSelector(selectToken);
   const meId = useSelector(selectUserId);
 
   const [showFullContent, setShowFullContent] = useState(false);
@@ -51,6 +50,7 @@ const PostComponent = ({ post }) => {
     post.content?.length > 50 ? true : false
   );
   const [comment, setComment] = useState('');
+  const [refreshCommentList, setRefreshCommentList] = useState([]);
   const [like, setLike] = useState(
     post.likes_with_users.some((user) => user.user_id == meId)
   );
@@ -61,6 +61,7 @@ const PostComponent = ({ post }) => {
   const [likeCount, setLikeCount] = useState(
     post.likes_with_users ? post.likes_with_users.length : 0
   );
+  const token = localStorage.getItem('token');
 
   //like
   const handleToggleLike = async () => {
@@ -155,9 +156,26 @@ const PostComponent = ({ post }) => {
     setShowReadMore(!showReadMore);
   };
 
-  const handleAddCommentClick = () => {
+  const handleAddCommentClick = async () => {
     // Implement the logic to add a comment using the 'comment' state
-    console.log('Add Comment clicked! Comment:', comment);
+    try {
+      const response = await axios.post(
+        `${API_URL}/comment/create-comment`,
+        {
+          post_id: post.id,
+          content: comment,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log(response);
+      setRefreshCommentList(!refreshCommentList);
+    } catch (error) {
+      console.log(error);
+    }
     setComment(''); // Clear the comment field after adding
   };
 
@@ -260,7 +278,7 @@ const PostComponent = ({ post }) => {
         {likeCount}
       </Typography>
       <Box>
-        <CommentList postId={post.id} />
+        <CommentList postId={post.id} refresh={refreshCommentList} />
       </Box>
       <Box
         sx={{
@@ -277,6 +295,11 @@ const PostComponent = ({ post }) => {
           value={comment}
           placeholder='Add Comment'
           onChange={(e) => setComment(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              handleAddCommentClick();
+            }
+          }}
           InputProps={{
             sx: { borderRadius: '24px' },
             endAdornment: (

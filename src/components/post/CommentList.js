@@ -5,7 +5,7 @@ import { Box } from '@mui/material';
 import axios from 'axios';
 import { format } from 'date-fns';
 
-const CommentList = ({ postId }) => {
+const CommentList = ({ postId, refresh }) => {
   console.log('Post id for comment: ', postId);
   const API_URL = process.env.REACT_APP_API_URL;
   const initialCommentsToShow = 1;
@@ -29,7 +29,7 @@ const CommentList = ({ postId }) => {
   };
   useEffect(() => {
     fetchComment();
-  }, []);
+  }, [refresh]);
 
   const handleShowMoreClick = () => {
     const newCommentsToShow = commentsToShow + additionalCommentsToShow;
