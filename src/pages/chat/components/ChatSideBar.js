@@ -79,6 +79,7 @@ const ChatSidebar = ({ renderChat }) => {
   const getData = () => {
     axios
       .get(API_URL + '/chat/get-chats', {
+          params: { perPage: 100 },
         headers: {
           'Content-Type': 'application/json',
           Authorization: 'Bearer ' + localStorage.getItem('token'),

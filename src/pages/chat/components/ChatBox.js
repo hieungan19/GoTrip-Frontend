@@ -90,26 +90,27 @@ const ChatBox = ({ chat_id }) => {
   };
 
   const startWebSocket = () => {
+    console.log('Hello from start socket.')
     echo
       .join(`chat.${chat_id}`)
       .here((users) => {
+        console.log('Successfully joined chat channel. Users:', users);
+        console.log('hehe'); 
         setUsers(users);
       })
       .joining((user) => {
+        console.log('Join user');
         setUsers((prevUsers) => [...prevUsers, user]);
       })
-      .leaving((user) => {
-        setUsers((prevUsers) => prevUsers.filter((u) => u.id !== user.id));
-      })
-      .listen('ChatMessageSent', (e) => {
+      .listen('.chat.message.sent', (e) => {
         console.log('Listen Chat Message Sent');
         setMessages((prevMessages) => [...prevMessages, e.message]);
         scrollToLastMessage();
-        if (localStorage.getItem('id') !== e.message.sender.id) {
+        if (localStorage.getItem('id') != e.message.sender.id) {
           const url = `${API_URL}/chat/message-status/${e.message.id}`;
-          axios.get(url, {
+          axios.patch(url, null, {
             headers: {
-              'Content-Type': 'application/json',
+              // 'Content-Type': 'application/json',
               Authorization: `Bearer ${localStorage.getItem('token')}`, // Use localStorage or another state management solution
             },
           });
