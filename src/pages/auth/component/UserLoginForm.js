@@ -92,10 +92,16 @@ function LoginForm() {
           isLoggedIn: true,
           token: token,
           id: userInfo.id,
+          phone_number: userInfo.phone_number,
+          cover_image_url: userInfo.cover_image_url,
+          avatar_url: userInfo.avatar_url,
+          intro: userInfo.intro,
         })
       );
 
       toast.success('Login successfully!');
+      localStorage.setItem('token', token);
+      localStorage.setItem('id', userInfo.id);
       navigate('/home');
       setIsLoading(false);
     } catch (error) {
@@ -142,7 +148,6 @@ function LoginForm() {
           {'Login'}
         </Typography>
         <form style={{ width: '100%' }}>
-          @csrf
           <>
             <TextField
               variant='outlined'

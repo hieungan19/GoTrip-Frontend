@@ -10,6 +10,7 @@ import {
   CardContent,
   CardHeader,
   CardMedia,
+  Dialog,
   IconButton,
   Menu,
   MenuItem,
@@ -19,44 +20,84 @@ import {
 import React, { useState } from 'react';
 import Slider from 'react-slick'; // Import the Slider component
 
-import 'slick-carousel/slick/slick-theme.css';
-import 'slick-carousel/slick/slick.css';
-import { Colors } from '../../styles/theme';
-import CommentList from './CommentList';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import DeletePostDialog from './DeletePostDialog';
 import axios from 'axios';
-import { toast } from 'react-toastify';
-import CreatePostModal from './CreatePostModal';
 import { format } from 'date-fns';
 import { useSelector } from 'react-redux';
-import { selectToken, selectUserId } from '../../redux/slice/authSlice';
-
-const images = [
-  'https://th.bing.com/th/id/R.1abee17234dca9feaf9d0064bf491f6e?rik=Gs1TTKs9hDMyHg&pid=ImgRaw&r=0',
-  'https://th.bing.com/th/id/R.1abee17234dca9feaf9d0064bf491f6e?rik=Gs1TTKs9hDMyHg&pid=ImgRaw&r=0',
-
-  // Add more image URLs as needed
-];
+import { toast } from 'react-toastify';
+import 'slick-carousel/slick/slick-theme.css';
+import 'slick-carousel/slick/slick.css';
+import {
+  selectToken,
+  selectUserAvatar,
+  selectUserId,
+  selectUserName,
+} from '../../redux/slice/authSlice';
+import { Colors } from '../../styles/theme';
+import UserList from '../user/UserList';
+import CommentList from './CommentList';
+import DeletePostDialog from './DeletePostDialog';
+import CreatePostModal from './CreatePostModal';
 
 const PostComponent = ({ post }) => {
+  const avatar_url = useSelector(selectUserAvatar);
   const API_URL = process.env.REACT_APP_API_URL;
   const formattedDate = format(new Date(post.created_at), 'dd/MM/yyyy HH:mm');
   const token = useSelector(selectToken);
+  const meId = useSelector(selectUserId);
 
   const [showFullContent, setShowFullContent] = useState(false);
   const [showReadMore, setShowReadMore] = useState(
     post.content?.length > 50 ? true : false
   );
   const [comment, setComment] = useState('');
-  const [like, setLike] = useState(true); // Added state for likes
+  const [like, setLike] = useState(
+    post.likes_with_users.some((user) => user.user_id == meId)
+  );
   const [anchorEl, setAnchorEl] = useState(null); // State for Menu
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [openEditDialog, setOpenEditDialog] = useState(false);
+  const [likeUserListOpen, setLikeUserListOpen] = useState(false);
+  const [likeCount, setLikeCount] = useState(
+    post.likes_with_users ? post.likes_with_users.length : 0
+  );
 
-  // post - user
-  const userId = useSelector(selectUserId);
+  //like
+  const handleToggleLike = async () => {
+    try {
+      if (!like) {
+        const response = await axios.post(
+          `${API_URL}/posts/${post.id}/like`,
+          null,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        setLike(true);
+        setLikeCount(likeCount + 1);
+      } else {
+        const response = await axios.delete(
+          `${API_URL}/posts/${post.id}/unlike`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        setLike(false);
+        setLikeCount(likeCount - 1);
+      }
 
+      console.log('Success');
+    } catch (error) {
+      toast.error('Fail');
+      console.log('Error: ', error.message);
+    }
+  };
+
+  const userName = useSelector(selectUserName);
   const handleDeleteConfirm = async () => {
     try {
       const response = await axios.delete(`${API_URL}/posts/${post.id}`, {
@@ -90,7 +131,8 @@ const PostComponent = ({ post }) => {
   };
 
   const handleCloseEdit = () => {
-    setOpenDeleteDialog(false);
+    console.log('Close');
+    setOpenEditDialog(false);
   };
 
   const handleDeleteClick = () => {
@@ -99,9 +141,6 @@ const PostComponent = ({ post }) => {
     setOpenDeleteDialog(true);
     handleMenuClose();
   };
-
-  const content =
-    'Your long content goes here... Your long content goes here... Your long content goes here...';
 
   const settings = {
     dots: true,
@@ -122,11 +161,6 @@ const PostComponent = ({ post }) => {
     setComment(''); // Clear the comment field after adding
   };
 
-  const handleLikeClick = () => {
-    // Implement the logic to increment the likes count
-    setLike(!like);
-  };
-
   return (
     <Card
       sx={{
@@ -135,17 +169,23 @@ const PostComponent = ({ post }) => {
         px: 1,
         flexDirection: 'column',
         mt: 4,
-        width: { lg: '600px', md: '500px', xs: '400px' },
+        width: { lg: '500px', md: '500px', xs: '400px' },
       }}
       elevation={3}
     >
       <CardHeader
         sx={{ textAlign: 'left', px: 0 }}
-        avatar={<Avatar src={post.author.avatar_url} />}
-        title={post.author.name}
+        avatar={
+          <Avatar
+            src={
+              post.author?.id !== meId ? post.author?.avatar_url : avatar_url
+            }
+          />
+        }
+        title={post.author?.id !== meId ? post.author?.name : userName}
         subheader={formattedDate}
         action={
-          post.author_id != userId ? (
+          post.author_id === meId ? (
             <IconButton onClick={handleMenuClick}>
               <MoreVertIcon />
             </IconButton>
@@ -186,9 +226,12 @@ const PostComponent = ({ post }) => {
               <CardMedia
                 component='img'
                 alt={`Post Image ${index + 1}`}
-                height={{ lg: '600px', md: '500px', xs: '400px' }}
                 image={item.image_url}
-                sx={{ objectFit: 'cover', px: 0.2 }}
+                style={{
+                  height: '500px',
+                  objectFit: 'cover',
+                  px: 0.2,
+                }}
               />
             </Box>
           ))}
@@ -196,7 +239,7 @@ const PostComponent = ({ post }) => {
       )}
 
       <CardActions sx={{ px: 0 }} disableSpacing>
-        <IconButton sx={{ pl: 0 }} aria-label='like' onClick={handleLikeClick}>
+        <IconButton sx={{ pl: 0 }} aria-label='like' onClick={handleToggleLike}>
           <FavoriteIcon sx={{ color: like ? Colors.love : null }} />
         </IconButton>
         <IconButton aria-label='comment'>
@@ -210,11 +253,14 @@ const PostComponent = ({ post }) => {
         variant='body2'
         fontWeight={700}
         sx={{ alignSelf: 'flex-start', mb: 1 }}
+        onClick={() => {
+          setLikeUserListOpen(true);
+        }}
       >
-        {post.like_count}
+        {likeCount}
       </Typography>
       <Box>
-        <CommentList />
+        <CommentList postId={post.id} />
       </Box>
       <Box
         sx={{
@@ -224,7 +270,7 @@ const PostComponent = ({ post }) => {
           my: '16px',
         }}
       >
-        <Avatar sx={{ mr: 2 }}></Avatar>
+        <Avatar sx={{ mr: 2 }} src=''></Avatar>
         <TextField
           sx={{ flexGrow: 1 }}
           size='small'
@@ -241,25 +287,41 @@ const PostComponent = ({ post }) => {
           }}
         />
       </Box>
-      <Menu
-        id='post-menu'
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={handleMenuClose}
-      >
-        <MenuItem onClick={handleEditClick}>Edit Post</MenuItem>
-        <MenuItem onClick={handleDeleteClick}>Delete Post</MenuItem>
-      </Menu>
+      {post.author_id === meId ? (
+        <Menu
+          id='post-menu'
+          anchorEl={anchorEl}
+          open={Boolean(anchorEl)}
+          onClose={handleMenuClose}
+        >
+          <MenuItem onClick={handleEditClick}>Edit Post</MenuItem>
+          <MenuItem onClick={handleDeleteClick}>Delete Post</MenuItem>
+        </Menu>
+      ) : null}
+
       <DeletePostDialog
         openDeleteDialog={openDeleteDialog}
         handleDeleteCancel={handleDeleteCancel}
         handleDeleteConfirm={handleDeleteConfirm}
       />
-      {/* <CreatePostModal
+      <Dialog
+        open={likeUserListOpen}
+        onClose={() => {
+          setLikeUserListOpen(false);
+        }}
+      >
+        <Box sx={{ height: '300px', p: 2 }}>
+          <UserList
+            text={'Users like'}
+            users={post.likes_with_users.map((u) => u.user)}
+          />
+        </Box>
+      </Dialog>
+      <CreatePostModal
         open={openEditDialog}
         onClose={handleCloseEdit}
         postDataToUpdate={post}
-      /> */}
+      />
     </Card>
   );
 };

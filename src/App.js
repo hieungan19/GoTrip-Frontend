@@ -17,6 +17,9 @@ import ChatPage from './pages/chat/ChatPage';
 import HomePage from './pages/home/HomePage';
 import PostComponent from './components/post/PostComponent';
 import NotificationPage from './pages/notification/NotificationPage';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap';
+import 'bootstrap-icons/font/bootstrap-icons.css';
 
 function App() {
   return (
@@ -34,7 +37,7 @@ function App() {
           <Route path='/login' element={<LoginPage />} />
           <Route path='/signup' element={<SignupPage />} />
           <Route path='/change-password' element={<ChangePasswordPage />} />
-          <Route path='/profile' element={<ProfilePage />} />
+          <Route path='/profile/:id' element={<ProfilePage />} />
           <Route path='/profile/edit' element={<EditProfilePage />}></Route>
           <Route path='/home' element={<HomePage />} />
           <Route path='/chat' element={<ChatPage />} />

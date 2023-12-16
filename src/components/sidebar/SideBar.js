@@ -19,6 +19,12 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import React, { useState } from 'react';
 import { Colors } from '../../styles/theme';
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import {
+  selectUserAvatar,
+  selectUserId,
+  selectUserName,
+} from '../../redux/slice/authSlice';
 
 const drawerWidth = 220;
 const icons = [
@@ -30,6 +36,9 @@ const icons = [
 
 const SideBar = ({ open, onClose }) => {
   const navigate = useNavigate();
+  const userName = useSelector(selectUserName);
+  const avatar = useSelector(selectUserAvatar);
+  const userId = useSelector(selectUserId);
 
   const container =
     window !== undefined ? () => window().document.body : undefined;
@@ -37,6 +46,7 @@ const SideBar = ({ open, onClose }) => {
 
   const handleListItemClick = (index) => {
     const url = icons[index].label.toLowerCase();
+
     navigate(`${url}`);
     if (url === 'logout') navigate('/login');
     setActiveIndex(index);
@@ -67,8 +77,11 @@ const SideBar = ({ open, onClose }) => {
         anchor='left'
       >
         <Toolbar />
-        <Container sx={{ py: 4 }} onClick={() => navigate('/profile')}>
-          <Avatar sx={{ mx: 'auto', p: 0, alignSelf: 'center' }} />
+        <Container
+          sx={{ py: 4 }}
+          onClick={() => navigate(`/profile/${userId}`)}
+        >
+          <Avatar src={avatar} sx={{ mx: 'auto', p: 0, alignSelf: 'center' }} />
           <Typography
             sx={{
               textAlign: 'center',
@@ -77,7 +90,7 @@ const SideBar = ({ open, onClose }) => {
               fontSize: 18,
             }}
           >
-            User name
+            {userName}
           </Typography>
         </Container>
         <Divider sx={{ width: '100%', borderWidth: '2px' }} />

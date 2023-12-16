@@ -15,13 +15,15 @@ import { storage } from '../../firebase/firebaseConfig';
 import { v4 as uuidv4 } from 'uuid';
 import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
 import { useSelector } from 'react-redux';
-import { selectToken } from '../../redux/slice/authSlice';
+import { selectToken, selectUserName } from '../../redux/slice/authSlice';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
 const CreatePostModal = ({ open, onClose, postDataToUpdate = null }) => {
+  const userName = useSelector(selectUserName);
   const [postDetail, setPostDetail] = useState('');
   const [selectedImages, setSelectedImages] = useState([]);
+
   const [isLoading, setLoading] = useState(false);
   //api
   const token = useSelector(selectToken);
@@ -30,7 +32,7 @@ const CreatePostModal = ({ open, onClose, postDataToUpdate = null }) => {
   useEffect(() => {
     if (postDataToUpdate) {
       setPostDetail(postDataToUpdate.content || ''); // Set content for updating
-      setSelectedImages(postDataToUpdate.images || []);
+      setSelectedImages(postDataToUpdate?.images.map((i) => i.image_url) || []);
     }
   }, [postDataToUpdate]);
 
@@ -51,35 +53,37 @@ const CreatePostModal = ({ open, onClose, postDataToUpdate = null }) => {
     try {
       const imageUrls = await Promise.all(
         selectedImages.map(async (image) => {
-          const imageRef = ref(storage, `images/${uuidv4()}`);
-          const uploadTask = uploadBytesResumable(imageRef, image);
+          if (typeof image !== 'string') {
+            const imageRef = ref(storage, `images/${uuidv4()}`);
+            const uploadTask = uploadBytesResumable(imageRef, image);
 
-          return new Promise((resolve, reject) => {
-            uploadTask.on(
-              'state_changed',
-              (snapshot) => {
-                const percent = Math.round(
-                  (snapshot.bytesTransferred / snapshot.totalBytes) * 100
-                );
-              },
-              (err) => {
-                console.log(err);
-                reject(err);
-              },
-              () => {
-                // download url
-                getDownloadURL(uploadTask.snapshot.ref)
-                  .then((url) => {
-                    console.log(url);
-                    resolve(url);
-                  })
-                  .catch((error) => {
-                    console.log(error);
-                    reject(error);
-                  });
-              }
-            );
-          });
+            return new Promise((resolve, reject) => {
+              uploadTask.on(
+                'state_changed',
+                (snapshot) => {
+                  const percent = Math.round(
+                    (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+                  );
+                },
+                (err) => {
+                  console.log(err);
+                  reject(err);
+                },
+                () => {
+                  // download url
+                  getDownloadURL(uploadTask.snapshot.ref)
+                    .then((url) => {
+                      console.log(url);
+                      resolve(url);
+                    })
+                    .catch((error) => {
+                      console.log(error);
+                      reject(error);
+                    });
+                }
+              );
+            });
+          } else return image;
         })
       );
 
@@ -93,7 +97,7 @@ const CreatePostModal = ({ open, onClose, postDataToUpdate = null }) => {
     setLoading(true);
     try {
       const images = await handleUploadImages();
-
+      console.log('Images: ', images);
       const postData = {
         content: postDetail,
         images: images,
@@ -101,7 +105,7 @@ const CreatePostModal = ({ open, onClose, postDataToUpdate = null }) => {
 
       if (postDataToUpdate) {
         // If updating, send a PUT request
-        await axios.put(`${API_URL}/posts/${postDataToUpdate.id}`, postData, {
+        await axios.patch(`${API_URL}/posts/${postDataToUpdate.id}`, postData, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -119,11 +123,22 @@ const CreatePostModal = ({ open, onClose, postDataToUpdate = null }) => {
         console.log('Bài viết tạo thành công:', response.data);
       }
     } catch (error) {
-      toast.error('Failed to create post. ');
+      toast.error('Failed to create/ update post. ');
       console.error('Lỗi khi tạo/cập nhật bài viết:', error.message);
+      console.log(error);
     }
     setLoading(false);
+    setSelectedImages([]);
+    setPostDetail('');
     onClose(); // Close the modal after creating/updating
+  };
+  const getImageUrl = (image) => {
+    if (typeof image === 'string' && image.startsWith('https://')) {
+      return image;
+    } else {
+      const blobUrl = URL.createObjectURL(image);
+      return blobUrl;
+    }
   };
 
   return (
@@ -152,7 +167,7 @@ const CreatePostModal = ({ open, onClose, postDataToUpdate = null }) => {
             <Avatar src='/path/to/avatar.jpg' alt='User Avatar' />
             <Box ml={2}>
               <Typography variant='body1' fontWeight='bold'>
-                John Doe {/* Replace with actual user name */}
+                {userName}
               </Typography>
             </Box>
           </Box>
@@ -191,7 +206,7 @@ const CreatePostModal = ({ open, onClose, postDataToUpdate = null }) => {
                   <CloseIcon fontSize='small' />
                 </IconButton>
                 <img
-                  src={URL.createObjectURL(image)}
+                  src={getImageUrl(image)}
                   alt={`Selected Img ${index + 1}`}
                   style={{
                     width: '100px',

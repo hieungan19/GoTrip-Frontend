@@ -1,22 +1,33 @@
-import React, { useState } from 'react';
+import EditIcon from '@mui/icons-material/Edit';
+import EmailIcon from '@mui/icons-material/Email';
 import {
+  Avatar,
   Box,
   Button,
-  Container,
+  Dialog,
+  DialogContent,
   Grid,
   Paper,
   Typography,
-  Avatar,
-  Dialog,
-  DialogContent,
 } from '@mui/material';
-import EditIcon from '@mui/icons-material/Edit';
-import EmailIcon from '@mui/icons-material/Email';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { useNavigate, useParams } from 'react-router-dom';
+import coverImgTemp from '../../assets/images/cover_img.jpg';
+import PostList from '../../components/post/PostList';
+import { selectUserId } from '../../redux/slice/authSlice';
 import { Colors } from '../../styles/theme';
-import ResponsiveSideBar from '../../components/sidebar/SideBar';
+
 const ProfilePage = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+
+  const API_URL = process.env.REACT_APP_API_URL;
   const [openCoverPicture, setOpenCoverPicture] = useState(false);
   const [openAvatar, setOpenAvatar] = useState(false);
+  const [user, setUser] = useState({});
+  const meId = useSelector(selectUserId);
 
   const handleOpenCoverPicture = () => setOpenCoverPicture(true);
   const handleCloseCoverPicture = () => setOpenCoverPicture(false);
@@ -24,16 +35,18 @@ const ProfilePage = () => {
   const handleOpenAvatar = () => setOpenAvatar(true);
   const handleCloseAvatar = () => setOpenAvatar(false);
 
-  const user = {
-    fullName: 'John Doe',
-    intro: 'Web Developer | Travel Enthusiast',
-    followers: 500,
-    following: 200,
-    coverPicture:
-      'https://img4.thuthuatphanmem.vn/uploads/2020/05/13/anh-nen-4k-anime_062606240.jpg',
-    avatar:
-      'https://img6.thuthuatphanmem.vn/uploads/2022/10/27/anh-avatar-nu-che-mat-anime_084750690.jpg',
+  const fetchData = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/users/${id}`);
+      setUser(response.data);
+    } catch (error) {
+      console.log(error);
+    }
   };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   return (
     <Box sx={{ pl: { xs: 0, sm: '200px' } }}>
@@ -45,7 +58,7 @@ const ProfilePage = () => {
           }}
         >
           <img
-            src={user.coverPicture}
+            src={user.cover_image_url ?? coverImgTemp}
             alt='Cover'
             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
             onClick={handleOpenCoverPicture}
@@ -60,7 +73,7 @@ const ProfilePage = () => {
             }}
           >
             <Avatar
-              src={user.avatar}
+              src={user.avatar_url}
               alt='Avatar'
               sx={{ width: 120, height: 120, border: '4px solid #fff' }}
               onClick={handleOpenAvatar}
@@ -79,14 +92,14 @@ const ProfilePage = () => {
           }}
         >
           <Typography variant='h5' sx={{ fontWeight: 'bold' }}>
-            {user.fullName}
+            {user.name}
           </Typography>
 
           <Typography
             variant='body1'
             sx={{ marginTop: 2, textAlign: 'center', color: Colors.dim_gray }}
           >
-            {`"${user.intro}"`}
+            {user.intro ? `"${user.intro}"` : null}
           </Typography>
           <Grid
             container
@@ -98,7 +111,7 @@ const ProfilePage = () => {
                 variant='h6'
                 sx={{ color: 'primary.main', fontWeight: 'bold' }}
               >
-                {user.followers}
+                {user.count_followees}
               </Typography>
               <Typography variant='subtitle2' sx={{ color: 'text.secondary' }}>
                 Followers
@@ -109,45 +122,53 @@ const ProfilePage = () => {
                 variant='h6'
                 sx={{ color: 'primary.main', fontWeight: 'bold' }}
               >
-                {user.following}
+                {user.count_followees}
               </Typography>
               <Typography variant='subtitle2' sx={{ color: 'text.secondary' }}>
                 Following
               </Typography>
             </Grid>
           </Grid>
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center', // Align the items horizontally
-              marginTop: 2,
-            }}
-          >
-            <Button variant='outlined' sx={{ marginRight: 1 }}>
-              Follow
-            </Button>
+          {id != meId ? (
+            <>
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center', // Align the items horizontally
+                  marginTop: 2,
+                }}
+              >
+                <Button variant='outlined' sx={{ marginRight: 1 }}>
+                  Follow
+                </Button>
+                <Button
+                  variant='outlined'
+                  startIcon={<EmailIcon />}
+                  sx={{ color: 'primary.main', textTransform: 'none' }}
+                >
+                  Message
+                </Button>
+              </Box>
+            </>
+          ) : (
             <Button
-              variant='outlined'
-              startIcon={<EmailIcon />}
-              sx={{ color: 'primary.main', textTransform: 'none' }}
+              variant='contained'
+              color='primary'
+              startIcon={<EditIcon />}
+              sx={{
+                marginTop: 2,
+                borderRadius: '50px', // Adjust the radius as needed
+                fontWeight: '400',
+                color: 'white',
+              }}
+              onClick={() => {
+                navigate('/profile/edit');
+              }}
             >
-              Message
+              Edit Profile
             </Button>
-          </Box>
-          <Button
-            variant='contained'
-            color='primary'
-            startIcon={<EditIcon />}
-            sx={{
-              marginTop: 2,
-              borderRadius: '50px', // Adjust the radius as needed
-              fontWeight: '400',
-              color: 'white',
-            }}
-          >
-            Edit Profile
-          </Button>
+          )}
         </Box>
       </Paper>
       {/* Cover Picture Modal */}
@@ -171,6 +192,10 @@ const ProfilePage = () => {
           />
         </DialogContent>
       </Dialog>
+
+      <Box display={'flex'} alignItems={'center'} justifyContent={'center'}>
+        <PostList url={`posts/author_posts_with_users_like/${id}`} />
+      </Box>
     </Box>
   );
 };

@@ -1,16 +1,14 @@
-import React, { useState } from 'react';
+import { Paper } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import TextField from '@mui/material/TextField';
-import Button from '@mui/material/Button';
-import Modal from '@mui/material/Modal';
+import React, { useState } from 'react';
 import CreatePostModal from '../../../components/post/CreatePostModal';
-import { Colors } from '../../../styles/theme';
-import { Box, Grid, Paper } from '@mui/material';
-import { Container } from 'reactstrap';
+import { useSelector } from 'react-redux';
+import { selectUserAvatar } from '../../../redux/slice/authSlice';
 
-const CreatePostButton = () => {
+const CreatePostButton = ({ handleRefresh }) => {
   const [isModalOpen, setModalOpen] = useState(false);
-
+  const avatar_url = useSelector(selectUserAvatar);
   const handleOpenModal = () => {
     console.log('hehe');
     setModalOpen(true);
@@ -34,7 +32,7 @@ const CreatePostButton = () => {
 
       <Avatar
         alt='User Avatar'
-        src='https://i.pravatar.cc/40'
+        src={avatar_url}
         style={{ marginRight: '8px' }}
       />
 
@@ -50,7 +48,11 @@ const CreatePostButton = () => {
       />
 
       {/* Additional Content in Modal */}
-      <CreatePostModal open={isModalOpen} onClose={handleCloseModal} />
+      <CreatePostModal
+        open={isModalOpen}
+        onClose={handleCloseModal}
+        handleRefresh={handleRefresh}
+      />
       {/* Add any other fields or buttons you need in the modal */}
     </Paper>
   );
