@@ -1,7 +1,8 @@
 import { createTheme } from '@mui/material/styles';
+import { lighten } from 'polished';
 export const Colors = {
-  primary: '#5f2c3e',
-  secondary: '#d1adcc',
+  primary: '#588E76',
+  secondary: '#FFA54F',
   success: '#4CAF50',
   info: '#00a2ff',
   danger: '#FF5722',
@@ -18,10 +19,49 @@ export const Colors = {
   dim_gray: '#696969',
   dove_gray: '#d5d5d5',
   body_bg: '#f3f6f9',
-  light_gray: 'rgb(230,230,230)',
+  light_gray: 'rgb(245,245,245)',
   ///////////////
   // Solid Color
   ///////////////
   white: '#fff',
   black: '#000',
+
+  //More
+  love: '#ff3040',
 };
+
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: Colors.primary,
+    },
+    secondary: {
+      main: Colors.secondary,
+    },
+  },
+  components: {
+    MuiButton: {
+      defaultProps: {
+        disableRipple: true,
+        disableElevation: true,
+      },
+    },
+    MuiDrawer: {
+      styleOverrides: {
+        paper: {
+          background: Colors.primary,
+          color: Colors.secondary,
+        },
+      },
+    },
+    MuiDivider: {
+      styleOverrides: {
+        root: {
+          borderColor: lighten(0.2, Colors.primary),
+        },
+      },
+    },
+  },
+});
+
+export default theme;
