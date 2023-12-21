@@ -10,16 +10,23 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import React, { useState, useEffect } from 'react';
-import { storage } from '../../firebase/firebaseConfig';
-import { v4 as uuidv4 } from 'uuid';
-import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
-import { useSelector } from 'react-redux';
-import { selectToken, selectUserName } from '../../redux/slice/authSlice';
 import axios from 'axios';
+import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
+import React, { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
+import { v4 as uuidv4 } from 'uuid';
+import { storage } from '../../firebase/firebaseConfig';
+import { selectUserAvatar, selectUserName } from '../../redux/slice/authSlice';
 
-const CreatePostModal = ({ open, onClose, postDataToUpdate = null }) => {
+const CreatePostModal = ({
+  open,
+  onClose,
+  setCurrentPost,
+  setPosts,
+  postDataToUpdate = null,
+}) => {
+  const avatar_url = useSelector(selectUserAvatar);
   const userName = useSelector(selectUserName);
   const [postDetail, setPostDetail] = useState('');
   const [selectedImages, setSelectedImages] = useState([]);
@@ -112,6 +119,11 @@ const CreatePostModal = ({ open, onClose, postDataToUpdate = null }) => {
         });
         // Handle the response as needed
         console.log('Bài viết cập nhật thành công');
+        setCurrentPost({
+          ...postDataToUpdate,
+          images: images.map((imgUrl, index) => ({ image_url: imgUrl })),
+          content: postDetail,
+        });
       } else {
         // If creating, send a POST request
         const response = await axios.post(`${API_URL}/posts`, postData, {
@@ -121,6 +133,9 @@ const CreatePostModal = ({ open, onClose, postDataToUpdate = null }) => {
         });
         toast.success('Post created sucessfully.');
         console.log('Bài viết tạo thành công:', response.data);
+        setPosts((prePosts) => [response.data, ...prePosts]);
+        setSelectedImages([]);
+        setPostDetail('');
       }
     } catch (error) {
       toast.error('Failed to create/ update post. ');
@@ -128,14 +143,13 @@ const CreatePostModal = ({ open, onClose, postDataToUpdate = null }) => {
       console.log(error);
     }
     setLoading(false);
-    setSelectedImages([]);
-    setPostDetail('');
     onClose(); // Close the modal after creating/updating
   };
   const getImageUrl = (image) => {
     if (typeof image === 'string' && image.startsWith('https://')) {
       return image;
     } else {
+      console.log('Image in post: ', image);
       const blobUrl = URL.createObjectURL(image);
       return blobUrl;
     }
@@ -164,7 +178,7 @@ const CreatePostModal = ({ open, onClose, postDataToUpdate = null }) => {
           mb={2}
         >
           <Box display='flex' alignItems='center'>
-            <Avatar src='/path/to/avatar.jpg' alt='User Avatar' />
+            <Avatar src={avatar_url} alt='User Avatar' />
             <Box ml={2}>
               <Typography variant='body1' fontWeight='bold'>
                 {userName}

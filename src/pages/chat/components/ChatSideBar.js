@@ -11,9 +11,8 @@ import {
   Box,
   Typography,
 } from '@mui/material';
-import { render } from '@testing-library/react';
 import SearchIcon from '@mui/icons-material/Search';
-import echo from '../echo';
+import echo from '../../echo';
 import axios from 'axios';
 import { Colors } from '../../../styles/theme/index';
 
@@ -79,7 +78,7 @@ const ChatSidebar = ({ renderChat }) => {
   const getData = () => {
     axios
       .get(API_URL + '/chat/get-chats', {
-          params: { perPage: 100 },
+        params: { perPage: 100 },
         headers: {
           'Content-Type': 'application/json',
           Authorization: 'Bearer ' + localStorage.getItem('token'),

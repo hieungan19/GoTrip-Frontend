@@ -11,9 +11,10 @@ const echo = new Echo({
   // wsPort: 6001,
   // wssPort: 6001,
   cluster: 'ap1',
+  encrypted: true,
   forceTLS: false,
   disableStats: true,
-  authEndpoint: 'http://localhost:8000/broadcasting/auth',
+  authEndpoint: 'http://34.87.90.9:8000/broadcasting/auth',
   auth: {
     headers: {
       Authorization: 'Bearer ' + localStorage.getItem('token'),

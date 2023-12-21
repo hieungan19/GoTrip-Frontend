@@ -58,31 +58,35 @@ const CustomAppBar = (props) => {
             }}
           >
             <SearchAppBarIcon />
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <Button
-                color='inherit'
-                sx={{
-                  mr: 1,
-                  border:
-                    location.pathname === '/login' ? '1px solid white' : 'none',
-                }}
-                onClick={() => navigate('login')}
-              >
-                Login
-              </Button>
-              <Button
-                variant='contained'
-                sx={{
-                  border:
-                    location.pathname === '/signup'
-                      ? '2px solid white'
-                      : 'none',
-                }}
-                onClick={() => navigate('signup')}
-              >
-                Sign up
-              </Button>
-            </Box>
+            {!localStorage.getItem('token') ? (
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Button
+                  color='inherit'
+                  sx={{
+                    mr: 1,
+                    border:
+                      location.pathname === '/login'
+                        ? '1px solid white'
+                        : 'none',
+                  }}
+                  onClick={() => navigate('login')}
+                >
+                  Login
+                </Button>
+                <Button
+                  variant='contained'
+                  sx={{
+                    border:
+                      location.pathname === '/signup'
+                        ? '2px solid white'
+                        : 'none',
+                  }}
+                  onClick={() => navigate('signup')}
+                >
+                  Sign up
+                </Button>
+              </Box>
+            ) : null}
           </Box>{' '}
         </Toolbar>
       </AppBar>
@@ -97,7 +101,12 @@ const CustomAppBar = (props) => {
               : 'block',
         }}
       >
-        <SideBar open={mobileOpen} onClose={handleDrawerToggle} />
+        <SideBar
+          open={mobileOpen}
+          onClose={handleDrawerToggle}
+          countUnReadNoti={props.countUnReadNoti}
+          setCountUnReadNoti={props.setCountUnReadNoti}
+        />
       </nav>
     </Box>
   );

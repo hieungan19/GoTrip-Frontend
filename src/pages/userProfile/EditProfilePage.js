@@ -59,7 +59,8 @@ const EditProfilePage = () => {
         cover_image_url: user.cover_image_url,
       });
       setAvatar(user.avatar_url);
-      setCoverImageFile(user.cover_image_url);
+      console.log('Cover Image: ', user.cover_image_url);
+      setCoverPicture(user.cover_image_url);
     } catch (error) {
       console.log(error);
     }
@@ -160,6 +161,7 @@ const EditProfilePage = () => {
       dispatch(SET_USER_AVATAR({ avatar_url: downloadURLAvatar }));
       dispatch(SET_USER_COVER_IMAGE({ cover_image_url: downloadURLCoverImg }));
       dispatch(SET_USER_NAME({ name: formData.name }));
+      console.log('User name from edit: ', formData.name);
 
       toast.success('Update sucessfully.');
     } catch (error) {
@@ -261,7 +263,7 @@ const EditProfilePage = () => {
                   }}
                 >
                   {/* Thêm biểu tượng hoặc nút thay đổi ảnh bìa tại đây */}
-                  <Tooltip title='Change Avatar'>
+                  <Tooltip title='Change Cover Image'>
                     <IconButton
                       style={{
                         backgroundColor: '#fff',

@@ -1,16 +1,11 @@
 import { Box } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import PostList from '../../components/post/PostList';
-import SuggestFollow from './component/SuggestFollow';
-import CreatePostButton from './component/CreatePostButton';
 import SearchUserList from '../../components/user/SearchUserList';
-
+import echo from '../echo';
+import CreatePostButton from './component/CreatePostButton';
 const HomePage = () => {
-  const [refresh, setRefresh] = useState(false);
-  const handleRefresh = () => {
-    setRefresh((pre) => !pre);
-  };
-  useEffect(() => {}, []);
+  const [posts, setPosts] = useState([]);
   return (
     <Box
       sx={{
@@ -21,8 +16,8 @@ const HomePage = () => {
       }}
     >
       <Box>
-        <CreatePostButton handleRefresh={handleRefresh} />
-        <PostList url={'posts'} refresh={refresh} />
+        <CreatePostButton setPosts={setPosts} />
+        <PostList url={'posts'} posts={posts} setPosts={setPosts} />
       </Box>
 
       <SearchUserList isDialog={false} />

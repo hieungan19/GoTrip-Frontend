@@ -4,7 +4,9 @@ import moment from 'moment';
 import { TextField, Button, Avatar } from '@mui/material';
 
 import SendIcon from '@mui/icons-material/Send';
-import echo from '../echo';
+import echo from '../../echo';
+import { useSelector } from 'react-redux';
+import { selectUserAvatar } from '../../../redux/slice/authSlice';
 
 const ChatBox = ({ chat_id }) => {
   const [messages, setMessages] = useState([]);
@@ -13,6 +15,11 @@ const ChatBox = ({ chat_id }) => {
   const [isSendingForm, setIsSendingForm] = useState(false);
   const [users, setUsers] = useState([]);
   const messsageContainersRef = useRef(null);
+  const meAvatar = useSelector(selectUserAvatar);
+  const meId = localStorage.getItem('id');
+  const participantAvt = chat.participants?.find(
+    (p) => p.user_id != meId
+  ).avatar_url;
   const API_URL = process.env.REACT_APP_API_URL;
 
   useEffect(() => {
@@ -90,12 +97,11 @@ const ChatBox = ({ chat_id }) => {
   };
 
   const startWebSocket = () => {
-    console.log('Hello from start socket.')
+    console.log('Hello from start socket.');
     echo
       .join(`chat.${chat_id}`)
       .here((users) => {
         console.log('Successfully joined chat channel. Users:', users);
-        console.log('hehe'); 
         setUsers(users);
       })
       .joining((user) => {
@@ -152,12 +158,14 @@ const ChatBox = ({ chat_id }) => {
                     <div className='small'>
                       <i
                         className={`bi bi-circle-fill ${
-                          users.find((u) => u.id === 1)
+                          users.find((u) => u.id == participant.user_id)
                             ? ' chat-online'
                             : ' chat-offline'
                         }`}
                       />
-                      {users.find((u) => u.id === 1) ? ' Online' : ' Offline'}
+                      {users.find((u) => u.id == participant.user_id)
+                        ? ' Online'
+                        : ' Offline'}
                     </div>
                   </div>
                 </div>
@@ -182,7 +190,16 @@ const ChatBox = ({ chat_id }) => {
               }`}
             >
               <div>
-                <Avatar src={msg.sender} alt='Avatar' width='40' height='40' />
+                <Avatar
+                  src={
+                    localStorage.getItem('id') == msg.sender.id
+                      ? meAvatar
+                      : participantAvt
+                  }
+                  alt='Avatar'
+                  width='40'
+                  height='40'
+                />
               </div>
               <div className='flex-shrink-1 message-box rounded py-2 px-3 mx-2'>
                 <div className='fw-bold mb-1'>{msg.sender.name}</div>

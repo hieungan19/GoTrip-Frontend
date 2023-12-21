@@ -17,10 +17,10 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     SET_USER_NAME: (state, action) => {
-      state.avatar_url = action.payload.avatar_url;
+      state.name = action.payload.name;
     },
     SET_USER_AVATAR: (state, action) => {
-      state.name = action.payload.name;
+      state.avatar_url = action.payload.avatar_url;
     },
     SET_USER_COVER_IMAGE: (state, action) => {
       state.cover_image_url = action.payload.cover_image_url;

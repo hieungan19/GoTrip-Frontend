@@ -18,16 +18,27 @@ import coverImgTemp from '../../assets/images/cover_img.jpg';
 import PostList from '../../components/post/PostList';
 import { selectUserId } from '../../redux/slice/authSlice';
 import { Colors } from '../../styles/theme';
+import UserList from '../../components/user/UserList';
 
 const ProfilePage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-
+  const [posts, setPosts] = useState([]);
   const API_URL = process.env.REACT_APP_API_URL;
   const [openCoverPicture, setOpenCoverPicture] = useState(false);
   const [openAvatar, setOpenAvatar] = useState(false);
   const [user, setUser] = useState({});
   const meId = useSelector(selectUserId);
+  const [isFollowed, setIsFollowed] = useState(false);
+  const [countFollowing, setCountFollowing] = useState(0);
+  const [countFollower, setCountFollower] = useState(0);
+  const [listFollowingOpen, setListFollowingOpen] = useState(false);
+  const [listFollowerOpen, setListFollowerOpen] = useState(false);
+
+  const [followers, setFollowers] = useState([]);
+  const [followees, setFollowees] = useState([]);
+
+  const token = localStorage.getItem('token');
 
   const handleOpenCoverPicture = () => setOpenCoverPicture(true);
   const handleCloseCoverPicture = () => setOpenCoverPicture(false);
@@ -35,10 +46,103 @@ const ProfilePage = () => {
   const handleOpenAvatar = () => setOpenAvatar(true);
   const handleCloseAvatar = () => setOpenAvatar(false);
 
+  const fetchFollowers = async () => {
+    try {
+      const response = await axios.get(
+        `${API_URL}/user-relationships/followers`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      const followers = response.data.followers.data;
+      if (followers != undefined) setFollowers(followers);
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+  const fetchFollowees = async () => {
+    try {
+      const response = await axios.get(
+        `${API_URL}/user-relationships/followees`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      const followees = response.data.followees.data;
+      if (followees != undefined) setFollowees(followees);
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
+  const fetchIsFollowed = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/user-relationships/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setIsFollowed(response.data.status);
+    } catch (error) {
+      console.log(error);
+    }
+  };
   const fetchData = async () => {
     try {
       const response = await axios.get(`${API_URL}/users/${id}`);
       setUser(response.data);
+      setCountFollowing(response.data.count_followees);
+      setCountFollower(response.data.count_followers);
+      await fetchIsFollowed();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleFollow = async () => {
+    try {
+      const response = await axios.post(
+        `${API_URL}/user-relationships/follow`,
+        {
+          user_id: id,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      if (response.status == 200) {
+        setIsFollowed(true);
+      }
+      setCountFollower((pre) => pre + 1);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const handleUnFollow = async () => {
+    try {
+      const response = await axios.delete(
+        `${API_URL}/user-relationships/unfollow`,
+        {
+          data: {
+            user_id: id,
+          },
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        setIsFollowed(false);
+      }
+
+      setCountFollower((pre) => pre - 1);
     } catch (error) {
       console.log(error);
     }
@@ -46,6 +150,8 @@ const ProfilePage = () => {
 
   useEffect(() => {
     fetchData();
+    fetchFollowees();
+    fetchFollowers();
   }, []);
 
   return (
@@ -106,23 +212,33 @@ const ProfilePage = () => {
             spacing={2}
             sx={{ marginTop: 1, justifyContent: 'center' }}
           >
-            <Grid item>
+            <Grid
+              item
+              onClick={() => {
+                setListFollowerOpen(true);
+              }}
+            >
               <Typography
                 variant='h6'
                 sx={{ color: 'primary.main', fontWeight: 'bold' }}
               >
-                {user.count_followees}
+                {countFollower}
               </Typography>
               <Typography variant='subtitle2' sx={{ color: 'text.secondary' }}>
                 Followers
               </Typography>
             </Grid>
-            <Grid item>
+            <Grid
+              item
+              onClick={() => {
+                setListFollowingOpen(true);
+              }}
+            >
               <Typography
                 variant='h6'
                 sx={{ color: 'primary.main', fontWeight: 'bold' }}
               >
-                {user.count_followees}
+                {countFollowing}
               </Typography>
               <Typography variant='subtitle2' sx={{ color: 'text.secondary' }}>
                 Following
@@ -139,13 +255,20 @@ const ProfilePage = () => {
                   marginTop: 2,
                 }}
               >
-                <Button variant='outlined' sx={{ marginRight: 1 }}>
-                  Follow
+                <Button
+                  variant='outlined'
+                  sx={{ marginRight: 1 }}
+                  onClick={isFollowed ? handleUnFollow : handleFollow}
+                >
+                  {isFollowed ? 'Unfollow' : 'Follow'}
                 </Button>
                 <Button
                   variant='outlined'
                   startIcon={<EmailIcon />}
                   sx={{ color: 'primary.main', textTransform: 'none' }}
+                  onClick={() => {
+                    navigate('/chat');
+                  }}
                 >
                   Message
                 </Button>
@@ -192,9 +315,30 @@ const ProfilePage = () => {
           />
         </DialogContent>
       </Dialog>
+      {/* Follow Count Dialog */}
+      <Dialog
+        open={listFollowerOpen}
+        onClose={() => {
+          setListFollowerOpen(false);
+        }}
+      >
+        <Box sx={{ height: '300px', p: 2 }}>
+          <UserList text={'Follower'} users={followers} />
+        </Box>
+      </Dialog>
 
+      <Dialog
+        open={listFollowingOpen}
+        onClose={() => {
+          setListFollowingOpen(false);
+        }}
+      >
+        <Box sx={{ height: '300px', p: 2 }}>
+          <UserList text={'Following'} users={followees} />
+        </Box>
+      </Dialog>
       <Box display={'flex'} alignItems={'center'} justifyContent={'center'}>
-        <PostList url={`posts/author_posts_with_users_like/${id}`} />
+        <PostList url={`posts/${id}`} posts={posts} setPosts={setPosts} />
       </Box>
     </Box>
   );

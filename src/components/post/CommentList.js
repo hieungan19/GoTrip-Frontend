@@ -8,7 +8,7 @@ import { format } from 'date-fns';
 const CommentList = ({ postId, refresh }) => {
   console.log('Post id for comment: ', postId);
   const API_URL = process.env.REACT_APP_API_URL;
-  const initialCommentsToShow = 1;
+  const initialCommentsToShow = 2;
   const additionalCommentsToShow = 5;
   const [commentsToShow, setCommentsToShow] = useState(initialCommentsToShow);
 

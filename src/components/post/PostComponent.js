@@ -42,34 +42,42 @@ import CreatePostModal from './CreatePostModal';
 const PostComponent = ({ post }) => {
   const avatar_url = useSelector(selectUserAvatar);
   const API_URL = process.env.REACT_APP_API_URL;
-  const formattedDate = format(new Date(post.created_at), 'dd/MM/yyyy HH:mm');
-  const meId = useSelector(selectUserId);
+  const [currentPost, setCurrentPost] = useState(post);
+  const formattedDate = format(
+    new Date(currentPost.created_at),
+    'dd/MM/yyyy HH:mm'
+  );
+  const token = localStorage.getItem('token');
+  const meId = localStorage.getItem('id');
 
   const [showFullContent, setShowFullContent] = useState(false);
   const [showReadMore, setShowReadMore] = useState(
-    post.content?.length > 50 ? true : false
+    currentPost.content?.length > 50 ? true : false
   );
   const [comment, setComment] = useState('');
   const [refreshCommentList, setRefreshCommentList] = useState([]);
   const [like, setLike] = useState(
-    post.likes_with_users.some((user) => user.user_id == meId)
+    currentPost.likes_with_users
+      ? currentPost.likes_with_users?.some((user) => user.user_id == meId)
+      : 0
   );
   const [anchorEl, setAnchorEl] = useState(null); // State for Menu
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [likeUserListOpen, setLikeUserListOpen] = useState(false);
   const [likeCount, setLikeCount] = useState(
-    post.likes_with_users ? post.likes_with_users.length : 0
+    currentPost.likes_with_users ? currentPost.likes_with_users.length : 0
   );
-  const token = localStorage.getItem('token');
 
   //like
   const handleToggleLike = async () => {
     try {
       if (!like) {
         const response = await axios.post(
-          `${API_URL}/posts/${post.id}/like`,
-          null,
+          `${API_URL}/posts/like`,
+          {
+            post_id: currentPost.id,
+          },
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -101,11 +109,14 @@ const PostComponent = ({ post }) => {
   const userName = useSelector(selectUserName);
   const handleDeleteConfirm = async () => {
     try {
-      const response = await axios.delete(`${API_URL}/posts/${post.id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await axios.delete(
+        `${API_URL}/posts/${currentPost.id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       toast.success('Delete successfully.');
     } catch (error) {
       toast.error(error.message);
@@ -162,7 +173,7 @@ const PostComponent = ({ post }) => {
       const response = await axios.post(
         `${API_URL}/comment/create-comment`,
         {
-          post_id: post.id,
+          post_id: currentPost.id,
           content: comment,
         },
         {
@@ -196,14 +207,18 @@ const PostComponent = ({ post }) => {
         avatar={
           <Avatar
             src={
-              post.author?.id !== meId ? post.author?.avatar_url : avatar_url
+              currentPost.author_id != meId
+                ? currentPost.author?.avatar_url
+                : avatar_url
             }
           />
         }
-        title={post.author?.id !== meId ? post.author?.name : userName}
+        title={
+          currentPost.author_id != meId ? currentPost.author?.name : userName
+        }
         subheader={formattedDate}
         action={
-          post.author_id === meId ? (
+          currentPost.author_id == meId ? (
             <IconButton onClick={handleMenuClick}>
               <MoreVertIcon />
             </IconButton>
@@ -212,11 +227,13 @@ const PostComponent = ({ post }) => {
       />
       <CardContent sx={{ px: 0 }}>
         <Typography variant='body2' textAlign={'left'}>
-          {post && post.content && (
+          {currentPost && currentPost.content && (
             <>
               {showFullContent
-                ? post.content
-                : `${post.content.slice(0, 50)}${showReadMore ? '...' : ''}`}
+                ? currentPost.content
+                : `${currentPost.content.slice(0, 50)}${
+                    showReadMore ? '...' : ''
+                  }`}
               {showReadMore && !showFullContent && (
                 <Button
                   onClick={handleReadMoreClick}
@@ -225,7 +242,7 @@ const PostComponent = ({ post }) => {
                   ... Read More
                 </Button>
               )}
-              {!showReadMore && post.content?.length > 50 && (
+              {!showReadMore && currentPost.content?.length > 50 && (
                 <Button
                   onClick={handleReadMoreClick}
                   sx={{ textTransform: 'capitalize' }}
@@ -237,9 +254,9 @@ const PostComponent = ({ post }) => {
           )}
         </Typography>
       </CardContent>
-      {Array.isArray(post.images) && (
+      {Array.isArray(currentPost.images) && (
         <Slider {...settings}>
-          {post.images.map((item, index) => (
+          {currentPost.images.map((item, index) => (
             <Box key={item.id}>
               <CardMedia
                 component='img'
@@ -278,7 +295,7 @@ const PostComponent = ({ post }) => {
         {likeCount}
       </Typography>
       <Box>
-        <CommentList postId={post.id} refresh={refreshCommentList} />
+        <CommentList postId={currentPost.id} refresh={refreshCommentList} />
       </Box>
       <Box
         sx={{
@@ -310,7 +327,7 @@ const PostComponent = ({ post }) => {
           }}
         />
       </Box>
-      {post.author_id === meId ? (
+      {post.author_id == meId ? (
         <Menu
           id='post-menu'
           anchorEl={anchorEl}
@@ -336,14 +353,15 @@ const PostComponent = ({ post }) => {
         <Box sx={{ height: '300px', p: 2 }}>
           <UserList
             text={'Users like'}
-            users={post.likes_with_users.map((u) => u.user)}
+            users={post.likes_with_users?.map((u) => u.user)}
           />
         </Box>
       </Dialog>
       <CreatePostModal
         open={openEditDialog}
         onClose={handleCloseEdit}
-        postDataToUpdate={post}
+        postDataToUpdate={currentPost}
+        setCurrentPost={setCurrentPost}
       />
     </Card>
   );

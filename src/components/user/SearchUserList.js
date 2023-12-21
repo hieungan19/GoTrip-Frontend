@@ -37,7 +37,6 @@ const SearchUserList = ({ openDialog, handleCloseDialog, isDialog = true }) => {
       const response = await axios.get(`${API_URL}/users`, {
         headers: {
           Accept: 'application/json',
-          'ngrok-skip-browser-warning': '69420',
         },
       });
       return response.data;
@@ -104,7 +103,6 @@ const SearchUserList = ({ openDialog, handleCloseDialog, isDialog = true }) => {
       )
     : [];
 
-  useEffect(() => {}, []);
   return isDialog ? (
     <>
       <Dialog
@@ -130,16 +128,12 @@ const SearchUserList = ({ openDialog, handleCloseDialog, isDialog = true }) => {
               ),
             }}
           />
-          <UserList
-            text={'Suggest Friend'}
-            users={filteredUsers.slice(0, 8)}
-            followees={followees}
-          />
+          <UserList users={filteredUsers.slice(0, 8)} followees={followees} />
         </DialogContent>
       </Dialog>
     </>
   ) : (
-    <Box mt={2} mx={4} width={'300px'}>
+    <Box mt={2} mx={4} width={'300px'} position={'fixed'} left={'65%'}>
       <TextField
         label='Search'
         variant='outlined'

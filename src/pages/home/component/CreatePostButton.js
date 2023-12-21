@@ -6,11 +6,10 @@ import CreatePostModal from '../../../components/post/CreatePostModal';
 import { useSelector } from 'react-redux';
 import { selectUserAvatar } from '../../../redux/slice/authSlice';
 
-const CreatePostButton = ({ handleRefresh }) => {
+const CreatePostButton = ({ setPosts }) => {
   const [isModalOpen, setModalOpen] = useState(false);
   const avatar_url = useSelector(selectUserAvatar);
   const handleOpenModal = () => {
-    console.log('hehe');
     setModalOpen(true);
   };
 
@@ -51,7 +50,7 @@ const CreatePostButton = ({ handleRefresh }) => {
       <CreatePostModal
         open={isModalOpen}
         onClose={handleCloseModal}
-        handleRefresh={handleRefresh}
+        setPosts={setPosts}
       />
       {/* Add any other fields or buttons you need in the modal */}
     </Paper>

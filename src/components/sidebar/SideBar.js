@@ -11,34 +11,51 @@ import {
   Toolbar,
   Typography,
   ListItemIcon,
+  Badge,
 } from '@mui/material';
 import HomeIcon from '@mui/icons-material/Home';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import ChatIcon from '@mui/icons-material/Chat';
 import LogoutIcon from '@mui/icons-material/Logout';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Colors } from '../../styles/theme';
 import { useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import {
+  SET_ACTIVE_USER,
   selectUserAvatar,
   selectUserId,
   selectUserName,
 } from '../../redux/slice/authSlice';
+import axios from 'axios';
+import { StyledBadge } from '../../styles/noti';
 
 const drawerWidth = 220;
-const icons = [
-  { icon: <HomeIcon />, label: 'HOME', key: 'home' },
-  { icon: <NotificationsIcon />, label: 'NOTIFICATION', key: 'notification' },
-  { icon: <ChatIcon />, label: 'CHAT', key: 'chat' },
-  { icon: <LogoutIcon />, label: 'LOGOUT', key: 'logout' },
-];
 
-const SideBar = ({ open, onClose }) => {
+const SideBar = ({ open, onClose, setCountUnReadNoti, countUnReadNoti }) => {
+  const API_URL = process.env.REACT_APP_API_URL;
   const navigate = useNavigate();
   const userName = useSelector(selectUserName);
+
   const avatar = useSelector(selectUserAvatar);
+
   const userId = useSelector(selectUserId);
+  const [user, setUser] = useState({});
+  const dispatch = useDispatch();
+  const icons = [
+    { icon: <HomeIcon />, label: 'HOME', key: 'home' },
+    {
+      icon: (
+        <Badge badgeContent={countUnReadNoti} color='secondary'>
+          <NotificationsIcon />
+        </Badge>
+      ),
+      label: 'NOTIFICATION',
+      key: 'notification',
+    },
+    { icon: <ChatIcon />, label: 'CHAT', key: 'chat' },
+    { icon: <LogoutIcon />, label: 'LOGOUT', key: 'logout' },
+  ];
 
   const container =
     window !== undefined ? () => window().document.body : undefined;
@@ -48,10 +65,43 @@ const SideBar = ({ open, onClose }) => {
     const url = icons[index].label.toLowerCase();
 
     navigate(`${url}`);
-    if (url === 'logout') navigate('/login');
+    if (url === 'logout') {
+      navigate('/login');
+      localStorage.removeItem('token');
+      localStorage.removeItem('id');
+    }
+    if (url === 'notification') {
+      setCountUnReadNoti(0);
+    }
     setActiveIndex(index);
   };
 
+  const fetchDataUser = async () => {
+    try {
+      const response = await axios.get(
+        `${API_URL}/users/${localStorage.getItem('id')}`
+      );
+      setUser(response.data);
+      dispatch(
+        SET_ACTIVE_USER({
+          email: response.data.email,
+          name: response.data.name,
+          isLoggedIn: true,
+          token: localStorage.getItem('token'),
+          id: response.data.id,
+          phone_number: response.data.phone_number,
+          cover_image_url: response.data.cover_image_url,
+          avatar_url: response.data.avatar_url,
+          intro: response.data.intro,
+        })
+      );
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  useEffect(() => {
+    fetchDataUser();
+  }, []);
   return (
     <Box sx={{ flexGrow: 1 }}>
       <Drawer

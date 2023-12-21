@@ -24,9 +24,6 @@ const Notification = ({ avatarSrc, username, detail, datetime }) => {
 
       {/* Notification Details */}
       <div>
-        <Typography variant='subtitle1' fontWeight={'bold'}>
-          {username}
-        </Typography>
         <Typography variant='body2'>{detail}</Typography>
         <Typography variant='caption' color='textSecondary'>
           {formattedDatetime}
