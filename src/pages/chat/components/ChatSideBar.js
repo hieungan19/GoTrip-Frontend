@@ -16,7 +16,7 @@ import echo from '../../echo';
 import axios from 'axios';
 import { Colors } from '../../../styles/theme/index';
 
-const ChatSidebar = ({ renderChat }) => {
+const ChatSidebar = ({ renderChat, user = null }) => {
   const [chats, setChats] = useState([]);
 
   const [users, setUsers] = useState([
@@ -74,25 +74,10 @@ const ChatSidebar = ({ renderChat }) => {
         setIsSendingForm(false);
       });
   };
-
-  const getData = () => {
-    axios
-      .get(API_URL + '/chat/get-chats', {
-        params: { perPage: 100 },
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: 'Bearer ' + localStorage.getItem('token'),
-        },
-      })
-      .then((response) => {
-        console.log(response);
-        setChats(response.data.chats);
-      });
-  };
-
-  const onSubmit = (userId) => {
+  const onSubmit = (userId = null) => {
     setIsSendingForm(true);
-    const user = users.find((o) => o.id === userId);
+
+    if (!user) user = users.find((o) => o.id === userId);
     setUsers([]);
     const data = new FormData();
     data.append('users[]', user.id);
@@ -115,10 +100,32 @@ const ChatSidebar = ({ renderChat }) => {
         OpentChat(response.data.chat.id);
       })
       .catch((error) => {
-        console.log(error);
+        // open exist chat
+        OpentChat(error.response.data.chat_id);
+
         setIsSendingForm(false);
       });
   };
+  const getData = async () => {
+    try {
+      const response = await axios.get(API_URL + '/chat/get-chats', {
+        params: { perPage: 100 },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer ' + localStorage.getItem('token'),
+        },
+      });
+
+      console.log(response);
+      setChats(response.data.chats);
+    } catch (error) {
+      console.error('Error fetching chats:', error);
+      // Xử lý lỗi nếu cần thiết
+    }
+
+    if (user) onSubmit();
+  };
+
   useEffect(() => {
     getData();
   }, []);

@@ -16,7 +16,7 @@ const NotificationPage = () => {
         },
       });
       console.log('Noti', response);
-      setNotifications(response.data.notifications.data.reverse());
+      setNotifications(response.data.notifications.reverse());
     } catch (error) {
       console.log('Error when fetch notifications');
     }
@@ -25,7 +25,7 @@ const NotificationPage = () => {
     fetchAllNotifications();
   }, []);
   return (
-    <Box sx={{ pl: { xs: 0, sm: '200px' } }}>
+    <Box sx={{ pl: { xs: 0, sm: '220px' } }}>
       <NotificationList notifications={notifications} />
     </Box>
   );

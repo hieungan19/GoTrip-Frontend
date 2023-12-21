@@ -2,8 +2,12 @@ import React, { useState } from 'react';
 import ChatSidebar from './components/ChatSideBar'; // Import the ChatSidebar component
 import ChatBox from './components/ChatBox'; // Import the ChatBox component
 import { Box } from '@mui/material';
+import { useLocation } from 'react-router';
 
 const App = () => {
+  const location = useLocation();
+  const user = location.state ? location.state.user : null;
+
   const [startChat, setStartChat] = useState(false);
   const [chatId, setChatId] = useState(0);
 
@@ -23,7 +27,7 @@ const App = () => {
             </div>
             <div className='col-md-4 '>
               {/* Chat Sidebar */}
-              <ChatSidebar renderChat={renderChat} />
+              <ChatSidebar renderChat={renderChat} user={user} />
             </div>
           </div>
         </div>

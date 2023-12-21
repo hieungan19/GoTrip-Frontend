@@ -46,7 +46,7 @@ const CommentList = ({ postId, refresh }) => {
         return (
           <Comment
             key={comment.id}
-            avatarSrc={comment.avatar_url}
+            avatarSrc={comment.user.avatar_url}
             username={comment.user.name}
             detail={comment.content}
             createdAt={formattedDate}

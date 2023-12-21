@@ -47,13 +47,13 @@ function LoginForm() {
 
       const response = await axios.post(`${BASE_URL}/authen/verify/pin`, data);
       const r = response.data;
-      if (r.message === 'success') {
-        dispatch(
-          SET_ACTIVE_USER({
-            email: formData.email,
-          })
-        );
-      }
+
+      dispatch(
+        SET_ACTIVE_USER({
+          email: formData.email,
+        })
+      );
+      console.log('Email when dispatch ', formData.email);
       navigate('/change-password');
     } catch (err) {
       toast.error('Wrong code.');

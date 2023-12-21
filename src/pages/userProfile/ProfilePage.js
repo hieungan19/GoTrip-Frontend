@@ -267,7 +267,7 @@ const ProfilePage = () => {
                   startIcon={<EmailIcon />}
                   sx={{ color: 'primary.main', textTransform: 'none' }}
                   onClick={() => {
-                    navigate('/chat');
+                    navigate('/chat', { state: { user: user } });
                   }}
                 >
                   Message

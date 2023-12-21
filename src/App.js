@@ -36,7 +36,10 @@ function App() {
         },
       });
       console.log('Noti', response);
-      setCountUnReadNotification(response.data.notifications.data.length);
+      const countUnReadNoti = response.data.notifications.filter(
+        (n) => n.is_read === false
+      ).length;
+      setCountUnReadNotification(countUnReadNoti);
     } catch (error) {
       console.log('Error when fetch notifications');
     }
@@ -54,7 +57,9 @@ function App() {
   useEffect(() => {
     fetchAllNotifications();
     startWebSocket();
-    navigate('/home');
+    const token = localStorage.getItem('token');
+    if (token) navigate('/home');
+    else navigate('/login');
   }, []);
   return (
     <div className='App'>
@@ -79,7 +84,7 @@ function App() {
           <Route path='/home' element={<HomePage />} />
           <Route path='/chat' element={<ChatPage />} />
           <Route path='/notification' element={<NotificationPage />} />
-          <Route path='/post/:id' element={<PostPage />}></Route>
+          <Route path='/posts/:id' element={<PostPage />}></Route>
         </Routes>
       </Container>
       <Footer />

@@ -16,6 +16,7 @@ const ChangePasswordPage = () => {
     confirmPassword: '',
   });
   const email = useSelector(selectEmail);
+
   const navigate = useNavigate();
 
   const handleChangePassword = async () => {

@@ -7,9 +7,12 @@ const NotificationList = ({ notifications }) => {
       {notifications.map((noti) => (
         <Notification
           key={noti.id}
-          avatarSrc={noti.hehe}
+          notiId={noti.id}
+          avatarSrc={noti.user_avatar_url}
           detail={noti.message}
           datetime={noti.created_at}
+          postId={noti.post}
+          isRead={noti.is_read}
         />
       ))}
     </div>

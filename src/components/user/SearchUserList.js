@@ -133,7 +133,14 @@ const SearchUserList = ({ openDialog, handleCloseDialog, isDialog = true }) => {
       </Dialog>
     </>
   ) : (
-    <Box mt={2} mx={4} width={'300px'} position={'fixed'} left={'65%'}>
+    <Box
+      mt={2}
+      mx={4}
+      width={'300px'}
+      position={'fixed'}
+      left={'65%'}
+      display={{ lg: 'block', md: 'none', xs: 'none' }}
+    >
       <TextField
         label='Search'
         variant='outlined'

@@ -9,6 +9,7 @@ const PostList = ({ url, posts, setPosts }) => {
   const [loading, setLoading] = useState(false);
   const API_URL = process.env.REACT_APP_API_URL;
   const token = localStorage.getItem('token');
+  const [author, setAuthor] = useState({});
 
   const fetchData = useCallback(
     async (url) => {
@@ -29,7 +30,10 @@ const PostList = ({ url, posts, setPosts }) => {
         });
         let data = [];
         if (url == 'posts') data = response.data.data;
-        else data = response.data.posts.data;
+        else {
+          data = response.data.posts.data;
+          setAuthor(response.data.author);
+        }
 
         if (page === 1 && posts.length > 0) return;
 
@@ -78,7 +82,11 @@ const PostList = ({ url, posts, setPosts }) => {
   return (
     <Box>
       {posts.map((post) => (
-        <PostComponent key={post.id} post={post} setPosts={setPosts} />
+        <PostComponent
+          key={post.id}
+          post={author.id ? { ...post, author } : post}
+          setPosts={setPosts}
+        />
       ))}
       {loading && <CircularProgress />}
     </Box>
