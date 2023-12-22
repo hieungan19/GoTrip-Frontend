@@ -38,7 +38,6 @@ const PostComponent = ({ post }) => {
   const avatar_url = useSelector(selectUserAvatar);
   const API_URL = process.env.REACT_APP_API_URL;
   const [currentPost, setCurrentPost] = useState(post);
-  console.log('Post: ', currentPost);
   const formattedDate =
     Object.keys(currentPost).length !== 0
       ? format(new Date(currentPost.created_at), 'dd/MM/yyyy HH:mm')
@@ -48,7 +47,7 @@ const PostComponent = ({ post }) => {
 
   const [showFullContent, setShowFullContent] = useState(false);
   const [showReadMore, setShowReadMore] = useState(
-    currentPost.content?.length > 50 ? true : false
+    currentPost.content?.length > 400 ? true : false
   );
   const [comment, setComment] = useState('');
   const [refreshCommentList, setRefreshCommentList] = useState([]);
@@ -64,7 +63,6 @@ const PostComponent = ({ post }) => {
   const [likeCount, setLikeCount] = useState(
     currentPost.likes_with_users ? currentPost.likes_with_users.length : 0
   );
-  console.log('Like count', likeCount);
   useEffect(() => {
     setCurrentPost(post);
     setLike(
@@ -104,11 +102,8 @@ const PostComponent = ({ post }) => {
         setLike(false);
         setLikeCount(likeCount - 1);
       }
-
-      console.log('Success');
     } catch (error) {
       toast.error('Fail');
-      console.log('Error: ', error.message);
     }
   };
 
@@ -150,13 +145,11 @@ const PostComponent = ({ post }) => {
   };
 
   const handleCloseEdit = () => {
-    console.log('Close');
     setOpenEditDialog(false);
   };
 
   const handleDeleteClick = () => {
     // Implement logic for deleting the post
-    console.log('Delete Post clicked!');
     setOpenDeleteDialog(true);
     handleMenuClose();
   };
@@ -189,16 +182,14 @@ const PostComponent = ({ post }) => {
           },
         }
       );
-      console.log(response);
       setRefreshCommentList(!refreshCommentList);
     } catch (error) {
-      console.log(error);
+      toast.error(error.message);
     }
     setComment(''); // Clear the comment field after adding
   };
 
   if (Object.keys(currentPost).length === 0) {
-    console.log('Current Post: ', currentPost);
     return null;
   } else
     return (
@@ -242,7 +233,7 @@ const PostComponent = ({ post }) => {
               <>
                 {showFullContent
                   ? currentPost.content
-                  : `${currentPost.content.slice(0, 50)}${
+                  : `${currentPost.content.slice(0, 400)}${
                       showReadMore ? '...' : ''
                     }`}
                 {showReadMore && !showFullContent && (
@@ -253,7 +244,7 @@ const PostComponent = ({ post }) => {
                     ... Read More
                   </Button>
                 )}
-                {!showReadMore && currentPost.content?.length > 50 && (
+                {!showReadMore && currentPost.content?.length > 400 && (
                   <Button
                     onClick={handleReadMoreClick}
                     sx={{ textTransform: 'capitalize' }}

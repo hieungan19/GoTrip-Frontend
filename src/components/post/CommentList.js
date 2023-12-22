@@ -4,9 +4,9 @@ import Button from '@mui/material/Button';
 import { Box } from '@mui/material';
 import axios from 'axios';
 import { format } from 'date-fns';
+import { toast } from 'react-toastify';
 
 const CommentList = ({ postId, refresh }) => {
-  console.log('Post id for comment: ', postId);
   const API_URL = process.env.REACT_APP_API_URL;
   const initialCommentsToShow = 2;
   const additionalCommentsToShow = 5;
@@ -22,9 +22,9 @@ const CommentList = ({ postId, refresh }) => {
         }
       );
       setComments(response.data.comments);
-      console.log('Comment', response.data.comments);
     } catch (error) {
       console.log(error);
+      // toast.error(error.message);
     }
   };
   useEffect(() => {

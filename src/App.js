@@ -4,7 +4,7 @@ import 'bootstrap-icons/font/bootstrap-icons.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import React, { useEffect, useState } from 'react';
 import { Route, Routes, useNavigate } from 'react-router-dom';
-import { ToastContainer } from 'react-toastify';
+import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
 import CustomAppBar from './components/appbar/CustomAppBar';
@@ -35,20 +35,19 @@ function App() {
           Authorization: `Bearer ${token}`,
         },
       });
-      console.log('Noti', response);
+
       const countUnReadNoti = response.data.notifications.filter(
         (n) => n.is_read === false
       ).length;
       setCountUnReadNotification(countUnReadNoti);
     } catch (error) {
-      console.log('Error when fetch notifications');
+      toast.error('Error when fetch notifications');
     }
   };
   const startWebSocket = async () => {
     echo
       .private(`author-channel.${meId}`)
       .listen('.post.liked.notification', (e) => {
-        console.log('Listen Like Sent');
         if (localStorage.getItem('id') !== e.like.user_id) {
           setCountUnReadNotification((pre) => pre + 1);
         }

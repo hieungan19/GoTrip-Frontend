@@ -19,6 +19,7 @@ import PostList from '../../components/post/PostList';
 import { selectUserId } from '../../redux/slice/authSlice';
 import { Colors } from '../../styles/theme';
 import UserList from '../../components/user/UserList';
+import { toast } from 'react-toastify';
 
 const ProfilePage = () => {
   const { id } = useParams();
@@ -59,7 +60,7 @@ const ProfilePage = () => {
       const followers = response.data.followers.data;
       if (followers != undefined) setFollowers(followers);
     } catch (error) {
-      console.log(error.message);
+      toast.error(error.message);
     }
   };
   const fetchFollowees = async () => {
@@ -88,7 +89,7 @@ const ProfilePage = () => {
       });
       setIsFollowed(response.data.status);
     } catch (error) {
-      console.log(error);
+      toast.error(error.message);
     }
   };
   const fetchData = async () => {
@@ -99,7 +100,7 @@ const ProfilePage = () => {
       setCountFollower(response.data.count_followers);
       await fetchIsFollowed();
     } catch (error) {
-      console.log(error);
+      toast.error(error.message);
     }
   };
 
@@ -144,7 +145,7 @@ const ProfilePage = () => {
 
       setCountFollower((pre) => pre - 1);
     } catch (error) {
-      console.log(error);
+      toast.error(error.message);
     }
   };
 
@@ -152,7 +153,7 @@ const ProfilePage = () => {
     fetchData();
     fetchFollowees();
     fetchFollowers();
-  }, []);
+  }, [id]);
 
   return (
     <Box sx={{ pl: { xs: 0, sm: '200px' } }}>

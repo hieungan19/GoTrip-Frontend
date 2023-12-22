@@ -56,7 +56,6 @@ const UserSignUpForm = () => {
         navigate('/login');
       }, 2000);
     } catch (error) {
-      console.error('Sign up failed:', error);
       setIsLoading(false);
       toast.error(error.message);
     }

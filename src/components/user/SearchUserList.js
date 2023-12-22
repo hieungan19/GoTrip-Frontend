@@ -16,6 +16,7 @@ import {
   STORE_USERS,
 } from '../../redux/slice/userSlice';
 import { selectToken } from '../../redux/slice/authSlice';
+import { toast } from 'react-toastify';
 
 const SearchUserList = ({ openDialog, handleCloseDialog, isDialog = true }) => {
   const API_URL = process.env.REACT_APP_API_URL;
@@ -41,7 +42,7 @@ const SearchUserList = ({ openDialog, handleCloseDialog, isDialog = true }) => {
       });
       return response.data;
     } catch (error) {
-      console.log(error.message);
+      toast.error(error.message);
     }
   };
 
@@ -59,7 +60,7 @@ const SearchUserList = ({ openDialog, handleCloseDialog, isDialog = true }) => {
       setFollowers(followers);
       dispatch(STORE_FOLLOWERS({ followers: followers }));
     } catch (error) {
-      console.log(error.message);
+      toast.error(error.message);
     }
   };
   const fetchFollowees = async () => {
@@ -76,7 +77,7 @@ const SearchUserList = ({ openDialog, handleCloseDialog, isDialog = true }) => {
       setFollowees(followees);
       dispatch(STORE_FOLLOWEES({ followees: followees }));
     } catch (error) {
-      console.log(error.message);
+      toast.error(error.message);
     }
   };
 

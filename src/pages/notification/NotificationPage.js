@@ -3,6 +3,7 @@ import NotificationList from './components/NotificationList';
 import echo from '../echo';
 import { Box } from '@mui/material';
 import axios from 'axios';
+import { toast } from 'react-toastify';
 
 const NotificationPage = () => {
   const API_URL = process.env.REACT_APP_API_URL;
@@ -15,10 +16,10 @@ const NotificationPage = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      console.log('Noti', response);
+
       setNotifications(response.data.notifications.reverse());
     } catch (error) {
-      console.log('Error when fetch notifications');
+      toast.error(error.message);
     }
   };
   useEffect(() => {

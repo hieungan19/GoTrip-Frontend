@@ -7,6 +7,7 @@ import SendIcon from '@mui/icons-material/Send';
 import echo from '../../echo';
 import { useSelector } from 'react-redux';
 import { selectUserAvatar } from '../../../redux/slice/authSlice';
+import { toast } from 'react-toastify';
 
 const ChatBox = ({ chat_id }) => {
   const [messages, setMessages] = useState([]);
@@ -62,15 +63,13 @@ const ChatBox = ({ chat_id }) => {
         }
       );
 
-      console.log('Messages:', response.data.messages);
       setMessages(response.data.messages);
       setChat(response.data.chat);
       echo.leave(`chat.${chat_id}`);
-      console.log('Chat id', chat_id);
 
       startWebSocket();
     } catch (error) {
-      console.error(error);
+      toast.error(error.message);
     }
   };
 
@@ -87,11 +86,11 @@ const ChatBox = ({ chat_id }) => {
           },
         }
       );
-      console.log(response);
+
       setIsSendingForm(false);
       setMessage('');
     } catch (error) {
-      console.error(error);
+      toast.error(error.message);
       setIsSendingForm(false);
     }
   };
@@ -101,15 +100,15 @@ const ChatBox = ({ chat_id }) => {
     echo
       .join(`chat.${chat_id}`)
       .here((users) => {
-        console.log('Successfully joined chat channel. Users:', users);
+        // console.log('Successfully joined chat channel. Users:', users);
         setUsers(users);
       })
       .joining((user) => {
-        console.log('Join user');
+        // console.log('Join user');
         setUsers((prevUsers) => [...prevUsers, user]);
       })
       .listen('.chat.message.sent', (e) => {
-        console.log('Listen Chat Message Sent');
+        // console.log('Listen Chat Message Sent');
         setMessages((prevMessages) => [...prevMessages, e.message]);
         scrollToLastMessage();
         if (localStorage.getItem('id') != e.message.sender.id) {
@@ -123,7 +122,7 @@ const ChatBox = ({ chat_id }) => {
         }
       })
       .listen('ChatMessageStatus', (e) => {
-        console.log('Listen ChatMessageStatus');
+        // console.log('Listen ChatMessageStatus');
         setMessages((prevMessages) =>
           prevMessages.map((msg) =>
             msg.id === e.message.id

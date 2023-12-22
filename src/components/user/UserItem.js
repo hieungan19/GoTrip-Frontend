@@ -6,6 +6,7 @@ import { selectFollowees } from '../../redux/slice/userSlice';
 import { selectUserId } from '../../redux/slice/authSlice';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 const UserItem = ({ user }) => {
   const meId = useSelector(selectUserId);
@@ -25,7 +26,7 @@ const UserItem = ({ user }) => {
       );
       setIsFollowed(response.data.status);
     } catch (error) {
-      console.log(error);
+      toast.error(error.message);
     }
   };
   useEffect(() => {
@@ -49,7 +50,7 @@ const UserItem = ({ user }) => {
         setIsFollowed(true);
       }
     } catch (error) {
-      console.log(error);
+      toast.error(error.message);
     }
   };
   const handleUnfollow = async (userId) => {
@@ -70,7 +71,7 @@ const UserItem = ({ user }) => {
         setIsFollowed(false);
       }
     } catch (error) {
-      console.log(error);
+      toast.error(error.message);
     }
   };
   const handleClickOnUser = () => {

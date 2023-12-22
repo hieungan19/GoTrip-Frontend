@@ -73,18 +73,15 @@ const CreatePostModal = ({
                   );
                 },
                 (err) => {
-                  console.log(err);
                   reject(err);
                 },
                 () => {
                   // download url
                   getDownloadURL(uploadTask.snapshot.ref)
                     .then((url) => {
-                      console.log(url);
                       resolve(url);
                     })
                     .catch((error) => {
-                      console.log(error);
                       reject(error);
                     });
                 }
@@ -96,7 +93,7 @@ const CreatePostModal = ({
 
       return imageUrls;
     } catch (error) {
-      console.error('Error uploading images:', error.message);
+      toast.error('Error uploading images:', error.message);
     }
   };
 
@@ -104,7 +101,7 @@ const CreatePostModal = ({
     setLoading(true);
     try {
       const images = await handleUploadImages();
-      console.log('Images: ', images);
+
       const postData = {
         content: postDetail,
         images: images,
@@ -118,7 +115,7 @@ const CreatePostModal = ({
           },
         });
         // Handle the response as needed
-        console.log('Bài viết cập nhật thành công');
+
         setCurrentPost({
           ...postDataToUpdate,
           images: images.map((imgUrl, index) => ({ image_url: imgUrl })),
@@ -132,15 +129,12 @@ const CreatePostModal = ({
           },
         });
         toast.success('Post created sucessfully.');
-        console.log('Bài viết tạo thành công:', response.data);
         setPosts((prePosts) => [response.data, ...prePosts]);
         setSelectedImages([]);
         setPostDetail('');
       }
     } catch (error) {
       toast.error('Failed to create/ update post. ');
-      console.error('Lỗi khi tạo/cập nhật bài viết:', error.message);
-      console.log(error);
     }
     setLoading(false);
     onClose(); // Close the modal after creating/updating
@@ -149,7 +143,6 @@ const CreatePostModal = ({
     if (typeof image === 'string' && image.startsWith('https://')) {
       return image;
     } else {
-      console.log('Image in post: ', image);
       const blobUrl = URL.createObjectURL(image);
       return blobUrl;
     }

@@ -59,10 +59,10 @@ const EditProfilePage = () => {
         cover_image_url: user.cover_image_url,
       });
       setAvatar(user.avatar_url);
-      console.log('Cover Image: ', user.cover_image_url);
+
       setCoverPicture(user.cover_image_url);
     } catch (error) {
-      console.log(error);
+      toast.error(error.message);
     }
   };
 
@@ -116,7 +116,6 @@ const EditProfilePage = () => {
           setUploadProgress(progress);
         },
         (error) => {
-          console.log(error);
           toast.error(error.message);
           reject(error);
         },
@@ -161,12 +160,10 @@ const EditProfilePage = () => {
       dispatch(SET_USER_AVATAR({ avatar_url: downloadURLAvatar }));
       dispatch(SET_USER_COVER_IMAGE({ cover_image_url: downloadURLCoverImg }));
       dispatch(SET_USER_NAME({ name: formData.name }));
-      console.log('User name from edit: ', formData.name);
 
       toast.success('Update sucessfully.');
     } catch (error) {
-      toast.error('Fail');
-      console.log(error);
+      toast.error(error.message);
     }
   };
 

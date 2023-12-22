@@ -53,7 +53,7 @@ function LoginForm() {
           email: formData.email,
         })
       );
-      console.log('Email when dispatch ', formData.email);
+
       navigate('/change-password');
     } catch (err) {
       toast.error('Wrong code.');
@@ -106,7 +106,7 @@ function LoginForm() {
       setIsLoading(false);
     } catch (error) {
       setIsLoading(false);
-      console.log(error);
+
       toast.error(error.message);
     }
   };
@@ -115,7 +115,7 @@ function LoginForm() {
     try {
       const data = new FormData();
       data.append('email', formData.email);
-      console.log(data);
+
       const response = await axios.post(
         `${BASE_URL}/authen/forgot-password`,
         data

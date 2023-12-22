@@ -15,6 +15,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import echo from '../../echo';
 import axios from 'axios';
 import { Colors } from '../../../styles/theme/index';
+import { toast } from 'react-toastify';
 
 const ChatSidebar = ({ renderChat, user = null }) => {
   const [chats, setChats] = useState([]);
@@ -29,8 +30,6 @@ const ChatSidebar = ({ renderChat, user = null }) => {
   const API_URL = process.env.REACT_APP_API_URL;
 
   const OpentChat = async (chatId) => {
-    // In ra chatId
-    console.log('Open chat: ', chatId);
     // Ngắt kết nối với kênh chat hiện tại
     await echo.leave('chat.' + currentChatId);
 
@@ -45,7 +44,7 @@ const ChatSidebar = ({ renderChat, user = null }) => {
 
   const searchUsers = (name) => {
     setIsSendingForm(true);
-    console.log('Name', name);
+
     if (name === '') {
       setUsers([]);
       return;
@@ -65,12 +64,12 @@ const ChatSidebar = ({ renderChat, user = null }) => {
         }
       )
       .then((response) => {
-        console.log('SEARCH:', response.data);
         setIsSendingForm(false);
         setUsers(response.data);
       })
       .catch((error) => {
-        console.log(error);
+        toast.error(error.message);
+
         setIsSendingForm(false);
       });
   };
@@ -91,11 +90,11 @@ const ChatSidebar = ({ renderChat, user = null }) => {
       })
       .then((response) => {
         setIsSendingForm(false);
-        console.log(response);
-        console.log('After add chat with a new user', [
-          ...chats,
-          response.data.chat,
-        ]);
+        // console.log(response);
+        // console.log('After add chat with a new user', [
+        //   ...chats,
+        //   response.data.chat,
+        // ]);
         setChats([...chats, response.data.chat]);
         OpentChat(response.data.chat.id);
       })
@@ -116,10 +115,10 @@ const ChatSidebar = ({ renderChat, user = null }) => {
         },
       });
 
-      console.log(response);
       setChats(response.data.chats);
     } catch (error) {
-      console.error('Error fetching chats:', error);
+      toast.error(error.message);
+
       // Xử lý lỗi nếu cần thiết
     }
 

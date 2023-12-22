@@ -29,6 +29,7 @@ import {
 } from '../../redux/slice/authSlice';
 import axios from 'axios';
 import { StyledBadge } from '../../styles/noti';
+import { toast } from 'react-toastify';
 
 const drawerWidth = 220;
 
@@ -96,7 +97,7 @@ const SideBar = ({ open, onClose, setCountUnReadNoti, countUnReadNoti }) => {
         })
       );
     } catch (error) {
-      console.log(error);
+      toast.error(error.message);
     }
   };
   useEffect(() => {

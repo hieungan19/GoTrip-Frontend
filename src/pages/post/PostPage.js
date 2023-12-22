@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import PostComponent from '../../components/post/PostComponent';
 import axios from 'axios';
 import { Box } from '@mui/system';
+import { toast } from 'react-toastify';
 
 const PostPage = () => {
   const { id } = useParams();
@@ -10,16 +11,15 @@ const PostPage = () => {
   const [post, setPost] = useState({});
   const fetchPost = async () => {
     try {
-      const response = await axios.get(`${API_URL}/posts`, {
+      const response = await axios.get(`${API_URL}/posts/get-post-by-id`, {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${localStorage.getItem('token')}`, // Use localStorage or another state management solution
         },
       });
       setPost(response.data.data.find((p) => p.id == id));
-      console.log(response.data.post);
     } catch (error) {
-      console.log(error);
+      toast.error(error.message);
     }
   };
   useEffect(() => {

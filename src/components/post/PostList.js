@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Box, CircularProgress } from '@mui/material';
 import PostComponent from './PostComponent';
 import axios from 'axios';
+import { toast } from 'react-toastify';
 
 const PostList = ({ url, posts, setPosts }) => {
   const perpage = 5;
@@ -14,7 +15,6 @@ const PostList = ({ url, posts, setPosts }) => {
   const fetchData = useCallback(
     async (url) => {
       if (loading) return;
-      console.log('Page: ', page);
       setLoading(true);
 
       try {
@@ -41,7 +41,8 @@ const PostList = ({ url, posts, setPosts }) => {
 
         setPage((prevPage) => prevPage + 1);
       } catch (error) {
-        console.error('Error fetching data:', error.message);
+        console.log(error);
+        // toast.error(error.message);
       }
 
       setLoading(false);
@@ -66,7 +67,6 @@ const PostList = ({ url, posts, setPosts }) => {
   }, [fetchData]);
 
   useEffect(() => {
-    console.log('Fetch Post');
     setPosts([]);
     // Fetch data when the component mounts
     fetchData(url);
