@@ -11,13 +11,16 @@ const PostPage = () => {
   const [post, setPost] = useState({});
   const fetchPost = async () => {
     try {
-      const response = await axios.get(`${API_URL}/posts/get-post-by-id`, {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`, // Use localStorage or another state management solution
-        },
-      });
-      setPost(response.data.data.find((p) => p.id == id));
+      const response = await axios.get(
+        `${API_URL}/posts/get-post-by-id/${id}`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem('token')}`, // Use localStorage or another state management solution
+          },
+        }
+      );
+      setPost(response.data.post);
     } catch (error) {
       toast.error(error.message);
     }

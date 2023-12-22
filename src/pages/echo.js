@@ -6,15 +6,11 @@ window.pusher = Pusher;
 const echo = new Echo({
   broadcaster: 'pusher',
   key: process.env.REACT_APP_WEBSOCKETS_KEY,
-  // secret: process.env.REACT_APP_WEBSOCKETS_SECRET,
-  // wsHost: process.env.REACT_APP_WEBSOCKETS_SERVER,
-  // wsPort: 6001,
-  // wssPort: 6001,
   cluster: 'ap1',
   encrypted: true,
   forceTLS: false,
   disableStats: true,
-  authEndpoint: 'http://34.87.90.9:8000/broadcasting/auth',
+  authEndpoint: 'https://gotrip.leobordea.uk/broadcasting/auth',
   auth: {
     headers: {
       Authorization: 'Bearer ' + localStorage.getItem('token'),

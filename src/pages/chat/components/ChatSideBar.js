@@ -117,8 +117,8 @@ const ChatSidebar = ({ renderChat, user = null }) => {
 
       setChats(response.data.chats);
     } catch (error) {
-      toast.error(error.message);
-
+      // toast.error(error.message);
+      console.log(error);
       // Xử lý lỗi nếu cần thiết
     }
 

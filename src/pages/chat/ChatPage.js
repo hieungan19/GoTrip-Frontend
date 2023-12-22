@@ -17,7 +17,7 @@ const App = () => {
   };
 
   return (
-    <Box sx={{ pl: { xs: 0, sm: '200px' } }}>
+    <Box sx={{ pl: { xs: 0, sm: '200px' }, height: '200px' }}>
       <main className='container min-h-content mb-3 '>
         <div className='card chat-card p-3'>
           <div className='row g-0'>
