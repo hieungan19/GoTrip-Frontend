@@ -97,7 +97,7 @@ const SideBar = ({ open, onClose, setCountUnReadNoti, countUnReadNoti }) => {
         })
       );
     } catch (error) {
-      toast.error(error.message);
+      console.log(error.message);
     }
   };
   useEffect(() => {

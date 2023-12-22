@@ -41,7 +41,7 @@ function App() {
       ).length;
       setCountUnReadNotification(countUnReadNoti);
     } catch (error) {
-      toast.error('Error when fetch notifications');
+      console.log(error.message);
     }
   };
   const startWebSocket = async () => {

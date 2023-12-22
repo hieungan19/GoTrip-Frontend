@@ -60,7 +60,7 @@ const SearchUserList = ({ openDialog, handleCloseDialog, isDialog = true }) => {
       setFollowers(followers);
       dispatch(STORE_FOLLOWERS({ followers: followers }));
     } catch (error) {
-      toast.error(error.message);
+      console.log(error.message);
     }
   };
   const fetchFollowees = async () => {
@@ -77,7 +77,7 @@ const SearchUserList = ({ openDialog, handleCloseDialog, isDialog = true }) => {
       setFollowees(followees);
       dispatch(STORE_FOLLOWEES({ followees: followees }));
     } catch (error) {
-      toast.error(error.message);
+      console.log(error.message);
     }
   };
 
