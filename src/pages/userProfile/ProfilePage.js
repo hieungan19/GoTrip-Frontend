@@ -299,7 +299,7 @@ const ProfilePage = () => {
       <Dialog open={openCoverPicture} onClose={handleCloseCoverPicture}>
         <DialogContent>
           <img
-            src={user.coverPicture}
+            src={user.cover_image_url}
             alt='Cover'
             style={{ maxWidth: '100%', maxHeight: '100%' }}
           />
@@ -310,7 +310,7 @@ const ProfilePage = () => {
       <Dialog open={openAvatar} onClose={handleCloseAvatar}>
         <DialogContent>
           <img
-            src={user.avatar}
+            src={user.avatar_url}
             alt='Avatar'
             style={{ maxWidth: '100%', maxHeight: '100%' }}
           />

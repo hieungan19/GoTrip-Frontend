@@ -70,7 +70,7 @@ const PostList = ({ url, posts, setPosts }) => {
     setPosts([]);
     // Fetch data when the component mounts
     fetchData(url);
-  }, []);
+  }, [url]);
 
   useEffect(() => {
     window.addEventListener('scroll', handleScroll);
